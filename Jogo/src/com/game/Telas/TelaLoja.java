@@ -15,7 +15,7 @@ public class TelaLoja extends JFrame{
 	 */
 	private static final long serialVersionUID = 1L;
 	private Conta conta;
-
+	
 	private JTextArea txtDados;
 	
 
@@ -23,7 +23,7 @@ public class TelaLoja extends JFrame{
 		this.conta = conta;
 		
 		setTitle("Loja!");
-		setSize(600, 400);
+		setSize(900, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
         txtDados = new JTextArea("Nível: " + conta.getNivel() + "  Nome: " + conta.getUsuario() + " Moedas: " + conta.getMoedas() + " Gemas: " + conta.getGemas());
@@ -104,6 +104,7 @@ public class TelaLoja extends JFrame{
 	        " Moedas: " + conta.getMoedas() +
 	        " Gemas: " + conta.getGemas()
 	    );
+	    
 	}
 
 	

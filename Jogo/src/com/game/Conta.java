@@ -31,9 +31,11 @@ public class Conta {
         this.desbloquearPersonagem(1);
         this.desbloquearPersonagem(7);
         this.desbloquearPersonagem(4);
+        this.desbloquearPersonagem(2);
+        this.desbloquearPersonagem(5);
         
         this.moedas = 1000;
-        this.gemas = 15;
+        this.gemas = 50;
     }
 
     // =========================
@@ -177,7 +179,7 @@ public class Conta {
 		return usuario;
 	}
     public int getVitorias() {
-    			return vitorias;
+    	return vitorias;
     }
     public int getDerrotas() {
 		return derrotas;
@@ -191,17 +193,17 @@ public class Conta {
 	}
     
     public int getExperiencia() {
-    			return experiencia;
+    	return experiencia;
     }
     
     public int getMoedas() {
-    		return moedas;
+    	return moedas;
     }
     public int getGemas() {
-    			return gemas;
+    	return gemas;
     }
     public long getIdConta() {
-    			return idConta;
+    	return idConta;
     }
     public int getMetaExp() {
     	return metaExp;
@@ -210,7 +212,7 @@ public class Conta {
 		return bancoDePersonagens.getTodosPersonagens();
 	}
     public BancoDePersonagens getBancoDePersonagens() {
-    			return bancoDePersonagens;
+    	return bancoDePersonagens;
     }
 	public Personagem getPersonagemPorId(long id) {
 		for (Personagem p : bancoDePersonagens.personagensDisponiveis) {

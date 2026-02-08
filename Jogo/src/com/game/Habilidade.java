@@ -78,6 +78,17 @@ public class Habilidade {
     public void voltarCooldownInicial() {
     	cooldownAtual = cooldownInicial;
     }
+    
+    public void resetarCooldown() {
+        this.cooldownAtual = 0;
+    }
+    public int getCooldownInicial() {
+    	return cooldownInicial;
+    }
+    
+    public int getCooldownMax() {
+    	return cooldownMax;
+    }
 
     /* ================= GETTERS ================= */
 

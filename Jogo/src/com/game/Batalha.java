@@ -23,8 +23,8 @@ public class Batalha {
     	this.time1 = time1;
         this.time2 = time2;
 
-        this.ativo1 = getProximoVivo(time1);
-        this.ativo2 = getProximoVivo(time2);    
+        this.ativo1 = getProximoVivo(time1, ativo1);
+        this.ativo2 = getProximoVivo(time2, ativo2);    
         int size1 = time1.size();
         for(int i = 0; i < size1; i++) {
         	time1.get(i).StatusNivel();
@@ -46,7 +46,7 @@ public class Batalha {
         return time.stream().anyMatch(Personagem::isVivo);
     }
 
-    public Personagem getProximoVivo(List<Personagem> time) {
+    public Personagem getProximoVivo(List<Personagem> time, Personagem ativo) {
         return time.stream()
                 .filter(Personagem::isVivo)
                 .findFirst()
@@ -56,13 +56,35 @@ public class Batalha {
     private void verificarTrocaAutomatica() {
         houveNocaute = false;
         if (ativo1 != null && !ativo1.isVivo()) {
-            ativo1 = getProximoVivo(time1);
+            ativo1 = getProximoVivo(time1, ativo1);
             houveNocaute = true;
         }
         if (ativo2 != null && !ativo2.isVivo()) {
-            ativo2 = getProximoVivo(time2);
+            ativo2 = getProximoVivo(time2, ativo2);
             houveNocaute = true;
         }
+    }
+
+    private void trocarPersonagemJogador() {
+        Personagem novo = getProximoVivoDiferente(time1, ativo1);
+
+        if (novo == ativo1) {
+            System.out.println("Não há outro personagem vivo para trocar.");
+            return;
+        }
+
+        ativo1 = novo;
+        ativo1.resetarCooldowns(); // como você comentou antes
+        System.out.println("Jogador trocou para: " + ativo1.getNome());
+    }
+
+    private Personagem getProximoVivoDiferente(List<Personagem> time, Personagem atual) {
+        for (Personagem p : time) {
+            if (p.isVivo() && p != atual) {
+                return p;
+            }
+        }
+        return atual; // se não tiver outro, mantém
     }
 
 
@@ -72,59 +94,69 @@ public class Batalha {
 
     public void turnoJogador(int habilidadeIndex) {
 
-        if (ativo1 == null || ativo2 == null) return;
+    	if (ativo1 == null || ativo2 == null) return;
 
-        if(ativo1.estaVivo() == false) this.ativo1 = getProximoVivo(time1);
-        if(ativo2.estaVivo() == false) this.ativo2 = getProximoVivo(time2);
+            if(ativo1.estaVivo() == false) this.ativo1 = getProximoVivo(time1, ativo1);
+            if(ativo2.estaVivo() == false) this.ativo2 = getProximoVivo(time2, ativo2);
 
-        int tim1 = time1.size();
-        int tim2 = time2.size();
-        for (int i = 0; i < tim1; i++) {
-        	if (time1.get(i) != null) time1.get(i).processarEfeitosPorTurno();
-        }
+            int tim1 = time1.size();
+            int tim2 = time2.size();
+            for (int i = 0; i < tim1; i++) {
+        	    if (time1.get(i) != null) time1.get(i).processarEfeitosPorTurno();
+            }
         
-        for(int i = 0; i < tim2; i++) {
-        	if (time2.get(i) != null) time2.get(i).processarEfeitosPorTurno();
-        }
+            for(int i = 0; i < tim2; i++) {
+        	    if (time2.get(i) != null) time2.get(i).processarEfeitosPorTurno();
+            }
         
-        for (int i = 0; i < tim1; i++) {
-        	time1.get(i).inicioDoTurno(ativo2, ativo1, time1, time2);
-        }
-        for (int i = 0; i < tim2; i++) {
-        	time2.get(i).inicioDoTurno(ativo1, ativo2, time2, time1);
-        }
+            for (int i = 0; i < tim1; i++) {
+        	    time1.get(i).inicioDoTurno(ativo2, ativo1, time1, time2);
+            }
+            for (int i = 0; i < tim2; i++) {
+        	    time2.get(i).inicioDoTurno(ativo1, ativo2, time2, time1);
+            }
         
-        verificarTrocaAutomatica();
-        // Jogador ataca
+            verificarTrocaAutomatica();
+            if (habilidadeIndex == 5) {
+                trocarPersonagemJogador();
+                
+                // troca consome o turno → IA joga
+                turnoIA();
+                return;
+            }
 
-        
+    	
+    		
+            // Jogador ataca
 
-        System.out.println("\n\n\n##Jogador##");
-        boolean usou = ativo1.usarHabilidades(ativo2, habilidadeIndex, ativo1, time1, time2);
-        if (!usou) return;
+            System.out.println("\n\n\n##Jogador##");
+            boolean usou = ativo1.usarHabilidades(ativo2, habilidadeIndex, ativo1, time1, time2);
+            if (!usou) return;
 
-        ativo1.reduzirCooldowns();
-        //verificarTrocaAutomatica();
+            ativo1.reduzirCooldowns();
+            //verificarTrocaAutomatica();
+            
+            if (!timeTemVivos(time2)) return;
+            
+         
+    	// IA ataca
+            if (ativo1 == null || ativo2 == null) return;
+            if (!ativo1.isVivo() || !ativo2.isVivo()) return;
 
-
-        if (!timeTemVivos(time2)) return;
-
-        // IA ataca
-     // IA ataca
-        if (ativo1 == null || ativo2 == null) return;
-        if (!ativo1.isVivo() || !ativo2.isVivo()) return;
-
-        turnoIA();
+            turnoIA();
   
 
-        for(int i = 0; i < tim1; i++) {
+            for(int i = 0; i < tim1; i++) {
         	time1.get(i).fimDoTurno(ativo2, ativo1, time1, time2);
-        }
-        for(int i = 0; i < tim2; i++) {
-        	time2.get(i).fimDoTurno(ativo1, ativo2, time2, time1);
-        }
-        verificarTrocaAutomatica();
-    }
+            }
+            for(int i = 0; i < tim2; i++) {
+        	    time2.get(i).fimDoTurno(ativo1, ativo2, time2, time1);
+            }
+            verificarTrocaAutomatica();
+    	}
+        
+
+
 
     private void turnoIA() {
 
@@ -166,9 +198,8 @@ public class Batalha {
                 p.ganharExperiencia(500);
                 p.resetarStatus();
                 System.out.println(p.getNome() + " ganhou 500 de experiencia e alcançou o nível " + p.getNivel());
-                conta.ganharMoedas(100);
-                conta.ganharGemas(5);
-                conta.ganharExperiencia(100);
+                conta.ganharMoedas((int)(conta.getNivel() * 50));
+                conta.ganharExperiencia((int)(conta.getNivel() * 100));
             }
 
             return "Você venceu!";

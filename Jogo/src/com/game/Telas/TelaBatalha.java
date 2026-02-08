@@ -20,13 +20,13 @@ public class TelaBatalha extends JFrame {
     private JTextArea txtHabilidadesP2;
 
 
-    private JButton[] botoesHabilidades = new JButton[4];
+    private JButton[] botoesHabilidades = new JButton[5];
 
     public TelaBatalha(Batalha batalha) {
         this.batalha = batalha;
 
         setTitle("Batalha");
-        setSize(900, 550);
+        setSize(900, 600);
         setLayout(new BorderLayout());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -62,6 +62,21 @@ public class TelaBatalha extends JFrame {
 
             painelBotoes.add(botoesHabilidades[i]);
         }
+        botoesHabilidades[4] = new JButton("Trocar");
+
+        botoesHabilidades[4].addActionListener(e -> {
+            batalha.turnoJogador(5);
+            atualizarTela();
+
+            if (batalha.batalhaEncerrada()) {
+                JOptionPane.showMessageDialog(this, batalha.getResultado());
+                dispose();
+                new TelaInicial(batalha.getConta()); // ⬅ VOLTA PRA TELA INICIAL
+            }
+
+
+        });
+        painelBotoes.add(botoesHabilidades[4]);
 
         add(painelBotoes, BorderLayout.SOUTH);
 

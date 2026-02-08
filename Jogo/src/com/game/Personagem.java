@@ -1,12 +1,13 @@
 package com.game;
 
+import java.awt.Image;
 import java.util.*;
 import com.game.Efeito.TagEfeito;
 
 public abstract class Personagem {
 	
 	@SuppressWarnings("unused")
-	private String imagem;
+	private Image imagem;
 	private String nome;
 	private long id;
 	private int ataqueInicial;
@@ -173,7 +174,9 @@ public abstract class Personagem {
 	public void setMultiplicadorCura(double MC) {this.multiplicadorCura = MC;}
 	public void setVivo(boolean vivo) {this.vivo = vivo;}  
 		
-	
+	public Image getImagem() {
+		return imagem;
+	}
 	
 	//Gerenciamento
 	public int ganharExperiencia(int exp) {
@@ -207,7 +210,7 @@ public abstract class Personagem {
 	//Gerenciamento dos Status pelo nível (para ser mais fácil de balancear)
 	public void StatusNivel() {
 		resetarStatus();
-		double valor1 = ((this.nivel - 1) * 0.05);
+		double valor1 = ((this.nivel - 1) * 0.1);
 		this.ataque += (int) (statusBase.ataque * valor1);
 		this.vidaMaxima += (int) (statusBase.vidaMaxima * valor1);
 		this.vida += (int) (statusBase.vida * valor1);
@@ -218,7 +221,7 @@ public abstract class Personagem {
 	}
 	
 	public void StatusGrau() {
-		double valor1 =(this.grau * 0.1);
+		double valor1 =(this.grau * 0.3);
 		this.ataque += (int) (statusBase.ataque * valor1);
 		this.vidaMaxima += (int) (statusBase.vidaMaxima * valor1);
 		this.vida += (int) (statusBase.vida * valor1);
@@ -289,6 +292,12 @@ public abstract class Personagem {
 
 	    return clone;
 	}
+	public void resetarCooldowns() {
+	    for (Habilidade h : habilidades) {
+	        h.resetarCooldown();
+	    }
+	}
+
 
 	public abstract boolean usarHabilidades(Personagem alvo, int valor, Personagem atacante, List<Personagem> time1, List<Personagem> time2);
 	
@@ -738,6 +747,95 @@ public abstract class Personagem {
 		 return this.getNome() + "   Defesa:" + getDefesaFinal() + "%  Protecão:" + getProtecao() + "  Nível: " + getNivel() + "\nVida: " + barraDeVida();
 	 }
 	
+	 
+	 public String listarStatusUI() {
+		    StringBuilder sb = new StringBuilder();
+		    String grauS = "";
+            for(int i = 0; this.getGrau() >= i; i++) {
+            	grauS += "🌟";
+            }
+
+		    sb.append(nome).append("\n");
+		    sb.append("Nível: ").append(nivel).append("\n");
+		    sb.append("Grau: ").append(grauS).append("\n");
+
+		    sb.append("Vida: ").append(barraDeVida()).append("\n");
+		    sb.append("Ataque: ").append(getAtaqueFinal()).append("\n");
+		    sb.append("Defesa: ").append(getDefesaFinal()).append("%\n");
+		    sb.append("Proteção: ").append(protecao).append("\n");
+		    sb.append("Velocidade: ").append(getVelocidadeFinal()).append("\n\n");
+
+		    sb.append("Efeitos ativos:\n");
+		    if (efeitosAtivos.isEmpty()) {
+		        sb.append("— Nenhum\n");
+		    } else {
+		        for (Efeito e : efeitosAtivos) {
+		            sb.append("• ")
+		              .append(e.getNomeEfeito())
+		              .append(" (")
+		              .append(e.getDuracao())
+		              .append("t)\n");
+		        }
+		    }
+
+		    return sb.toString();
+		}
+
+	 public String listarHabilidadesUI() {
+		    StringBuilder sb = new StringBuilder();
+
+		    sb.append("Habilidades:\n\n");
+
+		    for (int i = 0; i < habilidades.length; i++) {
+		        Habilidade h = habilidades[i];
+
+		        sb.append(i + 1).append(") ");
+
+		        if (h == null) {
+		            sb.append("Vazio\n\n");
+		            continue;
+		        }
+
+		        sb.append(h.getNome()).append("\n");
+		        sb.append(h.getDescricao()).append("\n");
+
+		        sb.append("Cooldown: ")
+		          .append(h.getCooldownInicial())
+		          .append("/")
+		          .append(h.getCooldownMax());
+
+		        if (h.podeUsar()) {
+		            sb.append("  ✔ Disponível");
+		        } else {
+		            sb.append("  ⏳ Em recarga");
+		        }
+
+		        sb.append("\n\n");
+		    }
+
+		    return sb.toString();
+		}
+	 public String listarPassivasUI() {
+		    if (efeitosAtivos.isEmpty()) {
+		        return "Nenhuma passiva ativa.";
+		    }
+
+		    StringBuilder sb = new StringBuilder();
+
+		    for (Efeito e : efeitosAtivos) {
+		        if (e.getCategoria() == Efeito.Categoria.BUFF) {
+		            sb.append("• ")
+		              .append(e.getNomeEfeito())
+		              .append(": ")
+		              .append(e.getDescricao())
+		              .append("\n");
+		        }
+		    }
+
+		    return sb.length() == 0 ? "Nenhuma passiva ativa." : sb.toString();
+		}
+
+
 	
 	
 	
@@ -784,6 +882,11 @@ public abstract class Personagem {
 	        }
 	    }
 	    return -1;
+	}
+	
+	public boolean compararId(long id) {
+		if(this.id == id) return true;
+		return false;
 	}
 
 }

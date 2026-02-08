@@ -25,7 +25,7 @@ public class TelaInicial extends JFrame {
 		this.conta = conta;
 		
 		setTitle("Tela inicial!");
-		setSize(600, 400);
+		setSize(900, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         btnIniciar = new JButton("Iniciar Batalha");
