@@ -1,4 +1,4 @@
-package com.game;
+package com.game.Telas;
 
 import java.awt.GridLayout;
 import java.util.ArrayList;
@@ -6,6 +6,10 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.*;
+
+import com.game.Batalha;
+import com.game.Conta;
+import com.game.Personagem;
 
 @SuppressWarnings("serial")
 public class TelaInicial extends JFrame {

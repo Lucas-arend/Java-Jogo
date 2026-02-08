@@ -229,6 +229,26 @@ public class Conta {
 	public void setSenha(String senha) {
 		this.senha = senha;
 	}
+	
+	public void ganharMoedas(int val) {
+		this.moedas += val;
+	}
+	public boolean gastarMoedas(int val) {
+		if (this.getMoedas() < val) return false;
+		
+		this.moedas -= val;
+		return true;
+	}
     
+	public void ganharGemas(int val) {
+		this.gemas += val;
+	}
+	
+	public boolean gastarGemas(int val) {
+		if (this.getGemas() < val) return false;
+		
+		this.moedas -= val;
+		return true;
+	}
 	
 }

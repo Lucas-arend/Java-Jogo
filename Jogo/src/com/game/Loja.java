@@ -9,25 +9,44 @@ public class Loja {
     public enum TipoLoja {
         BAU, OFERTA
     }
+    public enum TipoValor {
+    	MOEDA, GEMA
+    }
 
     public static ItemLoja[] listarBaus() {
         return new ItemLoja[] {
-            new ItemLoja("bau comum", TipoLoja.BAU),
-            new ItemLoja("bau lendário", TipoLoja.BAU)
+            new ItemLoja("bau comum", TipoLoja.BAU, TipoValor.MOEDA, 250),
+            new ItemLoja("bau lendário", TipoLoja.BAU, TipoValor.GEMA, 500)
         };
     }
 
     public static ItemLoja[] listarOfertas() {
         return new ItemLoja[] {
-            new ItemLoja("Oferta Inicial", TipoLoja.OFERTA)
+            new ItemLoja("Oferta Inicial", TipoLoja.OFERTA, TipoValor.MOEDA, 100)
         };
     }
 
     public static void comprar(Conta conta, ItemLoja item) {
         if (item.tipo == TipoLoja.BAU) {
-            comprarBau(conta, item.nome);
+        	if(item.tipoVal == TipoValor.MOEDA) {
+        		if (conta.gastarMoedas(item.valor) == true) comprarBau(conta, item.nome);
+        		else System.out.println("Moedas insuficientes!");
+        	}
+        	else if(item.tipoVal == TipoValor.GEMA) {
+        		if (conta.gastarGemas(item.valor) == true) comprarBau(conta, item.nome);
+        		else System.out.println("Gemas insuficientes!");
+        	}
+            
         } else {
-            comprarOferta(conta, item.nome);
+        	if (item.tipoVal == TipoValor.MOEDA) {
+        		if (conta.gastarMoedas(item.valor) == true) comprarOferta(conta, item.nome);
+        		else System.out.println("Moedas insuficientes!");
+        	}
+        	else if(item.tipoVal == TipoValor.GEMA) {
+        		if (conta.gastarGemas(item.valor) == true) comprarOferta(conta, item.nome);
+        		else System.out.println("Gemas insuficientes!");
+        	}
+            
         }
     }
 

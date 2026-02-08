@@ -166,6 +166,9 @@ public class Batalha {
                 p.ganharExperiencia(500);
                 p.resetarStatus();
                 System.out.println(p.getNome() + " ganhou 500 de experiencia e alcançou o nível " + p.getNivel());
+                conta.ganharMoedas(100);
+                conta.ganharGemas(5);
+                conta.ganharExperiencia(100);
             }
 
             return "Você venceu!";

@@ -1,9 +1,12 @@
-package com.game;
+package com.game.Telas;
 
 import java.awt.GridLayout;
 
 import javax.swing.*;
 
+import com.game.Conta;
+import com.game.ItemLoja;
+import com.game.Loja;
 import com.game.Loja.TipoLoja;
 
 public class TelaLoja extends JFrame{
@@ -37,7 +40,7 @@ public class TelaLoja extends JFrame{
 	    panel.setBorder(BorderFactory.createTitledBorder("Baús"));
 
 	    for (ItemLoja bau : Loja.listarBaus()) {
-	        JButton btn = new JButton(bau.nome.toUpperCase());
+	        JButton btn = new JButton(bau.nome.toUpperCase() + ", " + bau.valor + " " + bau.tipoVal);
 
 	        btn.addActionListener(e -> {
 	            Loja.comprar(conta, bau);
@@ -65,7 +68,7 @@ public class TelaLoja extends JFrame{
 	    panel.setBorder(BorderFactory.createTitledBorder("Ofertas"));
 
 	    for (ItemLoja oferta : Loja.listarOfertas()) {
-	        JButton btn = new JButton(oferta.nome);
+	        JButton btn = new JButton(oferta.nome + ", " + oferta.valor + " " + oferta.tipoVal);
 
 	        btn.addActionListener(e -> {
 	            Loja.comprar(conta, oferta);

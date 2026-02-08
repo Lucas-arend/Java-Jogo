@@ -1,7 +1,11 @@
-package com.game;
+package com.game.Telas;
 
 import java.awt.GridLayout;
 import javax.swing.*;
+
+import com.game.Conta;
+import com.game.Personagem;
+
 import java.util.List;
 
 @SuppressWarnings("serial")

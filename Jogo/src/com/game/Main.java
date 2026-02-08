@@ -2,6 +2,8 @@ package com.game;
 
 import javax.swing.SwingUtilities;
 
+import com.game.Telas.TelaInicial;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -9,7 +11,6 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
             Conta conta1 = new Conta("Jogador1", "senha1");
             new TelaInicial(conta1);
-            //new TelaSelecaoDeck(conta1);
         });
     }
 }

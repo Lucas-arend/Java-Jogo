@@ -1,7 +1,11 @@
-package com.game;
+package com.game.Telas;
 
 import java.awt.*;
 import javax.swing.*;
+
+import com.game.Batalha;
+import com.game.Habilidade;
+import com.game.Personagem;
 
 @SuppressWarnings("serial")
 public class TelaBatalha extends JFrame {
