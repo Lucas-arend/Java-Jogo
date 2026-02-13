@@ -26,20 +26,20 @@ public class Zumbi extends Personagem{
 				Raridade.LENDARIO, 
 				"Um grupo de zumbis, que aumenta seu bando ao derotar seu adverario. Quanto mais zumbis mais letal.",
 				new StatusBase(
-					    800, // vidaMaxima
-		                800,  // vida
-		                300,  // ataque
+					    600, // vidaMaxima
+		                600,  // vida
+		                200,  // ataque
 		                0,   // defesa %
-		                70,   // velocidade
+		                60,   // velocidade
 		                0,   // proteção
-		                25,   // chance de crítico
+		                10,   // chance de crítico
 		                1.25   // dano crítico
 		            )
 		        );
-			habilidades[0] = new Habilidade("Ataque de infecção", "Um ataque que causa baixo dano, porém causa infecção.", Arrays.asList(CaracteristicasHabilidade.DANO_BAIXO, CaracteristicasHabilidade.DOT_ALTO), 0, 0);
-		    habilidades[1] = new Habilidade("Ataque em bando", "Um ataque do bando de zumbis, quanto mais zumbis mais dano.", Arrays.asList(CaracteristicasHabilidade.DANO_ALTO), 1, 2); // começa em CD
-		    habilidades[2] = new Habilidade("Horda infinita", "Aumenta a quantidade de zumbis do bando em 2.", Arrays.asList(CaracteristicasHabilidade.REVIVER), 2, 4);
-		    habilidades[3] = new Habilidade("Devorar em grupo", "Causa dano de 20% da vida máxima do alvo por cada zumbi do bando.", Arrays.asList(CaracteristicasHabilidade.DANO_LETAL, CaracteristicasHabilidade.CURA_ALTA), 3, 3); // começa em CD
+			habilidades[0] = new Habilidade("Ataque de infecção", "Um ataque que causa " + (int) (this.getAtaqueFinal() + 0.75) + " de dano e deixa o adversário co infecção ( causa " + (int) (this.getAtaqueFinal() * 0.25) + " de dano por 2 turnos.", Arrays.asList(CaracteristicasHabilidade.DANO_BAIXO, CaracteristicasHabilidade.DOT_ALTO), 0, 0);
+		    habilidades[1] = new Habilidade("Ataque em bando", "Causa " + this.getAtaqueFinal() + " de dano para cada zumbi da horda ( causa dano " + bando + " vezes).", Arrays.asList(CaracteristicasHabilidade.DANO_ALTO), 1, 2); // começa em CD
+		    habilidades[2] = new Habilidade("Horda infinita", "Causa " + (int) (this.getAtaqueFinal() * 0.5) + " de dano por 2 turnos, recupera " + (int) (this.getAtaqueFinal() * 0.5) + " de vida por 2 turnos e aumenta a quantidade de zumbis da horda em 1.", Arrays.asList(CaracteristicasHabilidade.REVIVER), 2, 4);
+		    habilidades[3] = new Habilidade("Devorar em grupo", "Causa dano de 20% da vida máxima do alvo por cada zumbi da horda de " + bando + " zumbis ( causa " + (20 * bando) + "% da vida máxima do adversário de dano).", Arrays.asList(CaracteristicasHabilidade.DANO_LETAL, CaracteristicasHabilidade.CURA_ALTA), 3, 3); // começa em CD
 	}
     @Override
 	public boolean usarHabilidades(Personagem alvo, int valor, Personagem atacante, List<Personagem> time1, List<Personagem> time2) {
@@ -80,15 +80,22 @@ public class Zumbi extends Personagem{
 	    }
 	    else if (valor == 3) {
 	    	bando ++;
-	    	bando ++;
+	    	this.aplicarEfeito(ListaEfeitos.curaProlongada((int)(this.getAtaqueFinal() / 2), 3));
+	    	alvo.aplicarEfeito(ListaEfeitos.danoProlongado("Decomposição", (int)(this.getAtaqueFinal() / 2), 3));
 	    	System.out.println("Um bando de " + bando + " zumbis!");
 	    	
 	    }
 	    else if (valor == 4) {
+	    	int dilaceracao = 0;
 	    	for(int i = 0; i < bando; i++) {
 	    		if(!alvo.isVivo()) return true;
-	    		alvo.danoDireto((int)(alvo.getVidaMaxima() / 5), this, time1, time2);	    	
+	    		dilaceracao += ((int)(alvo.getVidaMaxima() / 5));	    	
 	    		}
+	    	alvo.danoDireto((int)(dilaceracao), this, time1, time2);
+	    	if (!alvo.isVivo()) {
+	    		this.bando ++;
+	    		System.out.println(bando);
+	    	}
 	    }
 	    else System.out.println("Habilidade invalida!");
 
@@ -126,18 +133,12 @@ public class Zumbi extends Personagem{
 	}
 	@Override
 	protected void AoNocautear(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
-		if(!adversario.isVivo()) {
-			this.bando ++;
-			this.setVidaMaxima(this.getVidaMaxima());	
-			this.aplicarEfeito(ListaEfeitos.protecao(this.getVidaMaxima(), 2));
-		}
+
 	}
 	@Override
 	protected void Nocauteado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
 		if (bando <= 0) return;
-		this.setVidaMaxima(getVidaMaximaInicial());
-	    this.setVida(this.getVidaInicial());
-	    this.setAtaque(getAtaqueInicial());
+	    this.setVida((int)(this.getVidaMaxima()));
 	    this.purificarEfeitos();
 	    this.anularEfeitos();
 	    this.setVivo(true);
@@ -149,7 +150,7 @@ public class Zumbi extends Personagem{
 			int efeitos = adversario.getEfeitosAtivos().size();
 		for(int i = 0; i < efeitos; i++) {
 			if(adversario.nomeEfeito("Infecção")) {
-	    	int dot = (int)(adversario.valorEfeito("Infecção") * 2);
+	    	int dot = (int)(adversario.valorEfeito("Infecção") * 1.5);
 	    	adversario.removerEfeitosPorNome("Infecção");
 	    	adversario.aplicarEfeito(ListaEfeitos.danoProlongado("Infecção", dot, 2).copiar());
 		}
@@ -161,6 +162,17 @@ public class Zumbi extends Personagem{
 	protected void fimDoTurno(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
 
 		
+	}
+	@Override
+	protected void adicionarImagem() {
+	    setCaminhoImagem("/resurces/Zumbi.png");
+		
+	}
+	@Override
+	protected String descricaoPassivas() {
+		// TODO Auto-generated method stub
+		return "O " + getNome() + " começa com uma horda de " + bando + " zumbis, ao ser nocauteado outro zumbi do bando entra em seu lugar! \n"
+				+ "O efeito infeccção dobra o seu dano no início de cada turno, e recebe + 1 turno de duração, (esse efeito para de afetar a infecção no momento que o último zumbi da horda for derrotado!";
 	}
 
 	

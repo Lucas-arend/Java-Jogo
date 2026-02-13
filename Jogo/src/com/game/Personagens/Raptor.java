@@ -36,10 +36,10 @@ public class Raptor extends Personagem {
 	                1.25   // dano crítico
 	            )
 	        );
-		habilidades[0] = new Habilidade("Ataque Furtivo", "Um ataque rápido que causa dano ao alvo.", Arrays.asList(CaracteristicasHabilidade.DANO), 0, 0);
-	    habilidades[1] = new Habilidade("Investida Rápida", "Aumenta temporariamente a velocidade e ganha protecao.", Arrays.asList(CaracteristicasHabilidade.AUMENTO_DE_VELOCIDADE, CaracteristicasHabilidade.PROTECAO), 1, 3); // começa em CD
-	    habilidades[2] = new Habilidade("Garras Cortantes", "Um ataque poderoso que causa dano significativo ao alvo.", Arrays.asList(CaracteristicasHabilidade.DANO_ALTO), 2, 2);
-	    habilidades[3] = new Habilidade("Rugido Intimidante", "Reduz o ataque do alvo temporariamente em 100%.", Arrays.asList(CaracteristicasHabilidade.REDUCAO_DE_ATAQUE), 2, 2); // começa em CD
+		habilidades[0] = new Habilidade("Ataque Furtivo", "Um ataque rápido que causa " + this.getAtaqueFinal() + " de dano ao alvo.", Arrays.asList(CaracteristicasHabilidade.DANO), 0, 0);
+	    habilidades[1] = new Habilidade("Investida Rápida", "Aumenta a velocidade em 30% por 2 turnos e ganha " + (int) (this.getAtaqueFinal() * 1.5) + " de protecao por 2 turnos.", Arrays.asList(CaracteristicasHabilidade.AUMENTO_DE_VELOCIDADE, CaracteristicasHabilidade.PROTECAO), 1, 3); // começa em CD
+	    habilidades[2] = new Habilidade("Garras Cortantes", "Um ataque poderoso que causa " + (int) (this.getAtaqueFinal() * 2) + " de dano ao alvo.", Arrays.asList(CaracteristicasHabilidade.DANO_ALTO), 2, 2);
+	    habilidades[3] = new Habilidade("Rugido Intimidante", "Reduz o ataque do alvo em 100% por 1 turno.", Arrays.asList(CaracteristicasHabilidade.REDUCAO_DE_ATAQUE), 2, 2); // começa em CD
     }
     
     
@@ -114,7 +114,6 @@ public class Raptor extends Personagem {
 
 	@Override
 	protected void aoAtacar(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
-		this.aplicarEfeito(ListaEfeitos.aumentoVelocidade(30, 3));
 		
 	}
 
@@ -151,6 +150,20 @@ public class Raptor extends Personagem {
 	protected void fimDoTurno(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
 		// TODO Auto-generated method stub
 		
+	}
+
+
+	@Override
+	protected void adicionarImagem() {
+	    setCaminhoImagem("/resurces/Raptor.png");
+		
+	}
+
+
+	@Override
+	protected String descricaoPassivas() {
+		// TODO Auto-generated method stub
+		return "Sem passivas disponíveis!";
 	}
     
 }

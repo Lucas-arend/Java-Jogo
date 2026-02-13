@@ -7,6 +7,7 @@ import com.game.Batalha;
 import com.game.Habilidade;
 import com.game.Personagem;
 
+
 @SuppressWarnings("serial")
 public class TelaBatalha extends JFrame {
 
@@ -48,7 +49,7 @@ public class TelaBatalha extends JFrame {
             botoesHabilidades[i] = new JButton("—");
 
             botoesHabilidades[i].addActionListener(e -> {
-                batalha.turnoJogador(idx);
+                batalha.batalha(idx);
                 atualizarTela();
 
                 if (batalha.batalhaEncerrada()) {
@@ -65,7 +66,7 @@ public class TelaBatalha extends JFrame {
         botoesHabilidades[4] = new JButton("Trocar");
 
         botoesHabilidades[4].addActionListener(e -> {
-            batalha.turnoJogador(5);
+            batalha.batalha(5);
             atualizarTela();
 
             if (batalha.batalhaEncerrada()) {
@@ -125,6 +126,7 @@ public class TelaBatalha extends JFrame {
         painel.add(new JScrollPane(txtStatus));
         painel.add(new JLabel("HABILIDADES"));
         painel.add(new JScrollPane(txtHabilidades));
+        //painel.add(new jimage());
 
 
         if (jogador) {
@@ -151,13 +153,18 @@ public class TelaBatalha extends JFrame {
 
         /* ===== PLAYER ===== */
         if (p1 != null) {
-            txtStatusP1.setText(p1.listarStatus());
+            txtStatusP1.setText(p1.listarStatusUIBatalha());
             txtStatusTimeP1.setText("");
             int val = batalha.time1.size();
             for (int i = 0; i < val; i++) {
             	txtStatusTimeP1.setText(txtStatusTimeP1.getText() + batalha.time1.get(i).listarResumoVida() + "\n" );
             }
-            txtHabilidadesP1.setText(p1.listarHabilidades());
+            txtHabilidadesP1.setText(p1.listarHabilidadesUIBatalha());
+            PainelImagem imagem = new PainelImagem(
+            	    new ImageIcon(getClass().getResource(p1.getCaminhoImagem()))
+            	);
+
+            	imagem.setPreferredSize(new Dimension(150, 250));
             
             //System.out.println("Jogador:\n" + p1.listarStatus());
 
@@ -174,13 +181,13 @@ public class TelaBatalha extends JFrame {
 
         /* ===== INIMIGO ===== */
         if (p2 != null) {
-            txtStatusP2.setText(p2.listarStatus());
+            txtStatusP2.setText(p2.listarStatusUIBatalha());
             txtStatusTimeP2.setText("");
             int val = batalha.time2.size();
             for (int i = 0; i < val; i++) {
             	txtStatusTimeP2.setText(txtStatusTimeP2.getText() + batalha.time2.get(i).listarResumoVida() + "\n" );
             }
-            txtHabilidadesP2.setText(p2.listarHabilidades());
+            txtHabilidadesP2.setText(p2.listarHabilidadesUIBatalha());
             //System.out.println("IA:\n" + p2.listarStatus());
 
         }

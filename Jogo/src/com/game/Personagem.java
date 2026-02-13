@@ -7,7 +7,7 @@ import com.game.Efeito.TagEfeito;
 public abstract class Personagem {
 	
 	@SuppressWarnings("unused")
-	private Image imagem;
+	private String caminhoImagem;
 	private String nome;
 	private long id;
 	private int ataqueInicial;
@@ -91,6 +91,7 @@ public abstract class Personagem {
 	    } else this.nivel = 1;
 	    this.setGrau(raridade.getGrauInicial());
 	    resetarStatus();
+	    adicionarImagem();
 	}
 
 	public void resistencias(double resisReducaoDano, double resisReducaoVelocidade, double resisReducaoDanoCritico, double resisReducaoChanceCritico, double resisReducaoCura, double resisDOT, double resisDilaceracao) {
@@ -104,6 +105,8 @@ public abstract class Personagem {
 	}
 	
 	//Getters
+
+	public String getCaminhoImagem() {return caminhoImagem;}
 	public String getNome() {return nome;}
 	public int getVida() {return vida;}
 	public int getAtaque() {return ataque;}
@@ -157,6 +160,13 @@ public abstract class Personagem {
 	
 	
 	//Setters
+	protected void setCaminhoImagem(String caminhoImagem) {
+	    if (caminhoImagem == null || caminhoImagem.isEmpty()) {
+	        this.caminhoImagem = "/imagens/personagens/placeholder.png";
+	    } else {
+	        this.caminhoImagem = caminhoImagem;
+	    }
+	}
 	public void setNome(String nome) {this.nome = nome;}
 	public void setVida(int vida) {this.vida = vida;}
 	public void setAtaque(int ataque) {this.ataque = ataque;}
@@ -173,10 +183,6 @@ public abstract class Personagem {
 	public void setMultiplicadorDano(double MD) {this.multiplicadorDano = MD;}
 	public void setMultiplicadorCura(double MC) {this.multiplicadorCura = MC;}
 	public void setVivo(boolean vivo) {this.vivo = vivo;}  
-		
-	public Image getImagem() {
-		return imagem;
-	}
 	
 	//Gerenciamento
 	public int ganharExperiencia(int exp) {
@@ -261,6 +267,7 @@ public abstract class Personagem {
 	}
 
 	public abstract Personagem copiar();
+	protected abstract void adicionarImagem();
 	
 	protected abstract void adicionarHabilidade(Habilidade copiar);
 	
@@ -275,6 +282,8 @@ public abstract class Personagem {
 	protected abstract void inicioDoTurno(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2);
 	
 	protected abstract void fimDoTurno(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2);
+	
+	protected abstract String descricaoPassivas();
 
 	//Batalha
 	
@@ -326,7 +335,7 @@ public abstract class Personagem {
 	    return vida > 0;
 	}
 
-	public void nocautear(Personagem adversario, List<Personagem> time1, List<Personagem> time2) {
+	public void nocautear(Personagem adversario, List<Personagem> time1, List<Personagem> time2, boolean ativar) {
 		if (vida > 0) {
 			vida = 0;
 		}
@@ -334,8 +343,8 @@ public abstract class Personagem {
 			this.vida = 0;
 			this.vivo = false;
 		}
+        if(ativar) this.Nocauteado(adversario, this, time1, null);
         
-        this.Nocauteado(adversario, this, time1, null);
 		
 	}
 	
@@ -382,7 +391,7 @@ public abstract class Personagem {
 	    if (vida < 0) vida = 0;     
 	    // 🔥 MORTE
 	    if (vida == 0) {
-	    	nocautear(atacante, time1, time2);
+	    	nocautear(atacante, time1, time2, true );
 	    }   
 	    if (!vivo && atacante != null) {
 	        atacante.AoNocautear(this, atacante, time1, time2);
@@ -416,7 +425,7 @@ public abstract class Personagem {
 	    if (vida < 0) vida = 0;     
 	    // 🔥 MORTE
 	    if (vida == 0) {
-	    	nocautear(atacante, time1, time2);
+	    	nocautear(atacante, time1, time2, true);
 	    }   
 	    if (!vivo && atacante != null) {
 	        atacante.AoNocautear(this, atacante, time1, time2);
@@ -436,16 +445,14 @@ public abstract class Personagem {
 	}
 
 	public void danoDOT(int dano, Personagem atacante,  List<Personagem> time1, List<Personagem> time2) {
-	this.vida -= dano;
+		if(!this.isVivo()) return;
+	    this.vida -= dano;
 	    // 🔒 Nunca deixar HP negativo aqui
 	    if (vida < 0) vida = 0;     
 	    // 🔥 MORTE
 	    if (vida == 0) {
-	    	nocautear(atacante, time1, time2);
+	    	nocautear(atacante, time1, time2, true);
 	    }   
-	    if (!vivo && atacante != null) {
-	        atacante.AoNocautear(this, atacante, time1, time2);
-	    }
 	    setUltimoAtacante(atacante);	
 	}
 
@@ -756,27 +763,18 @@ public abstract class Personagem {
             }
 
 		    sb.append(nome).append("\n");
-		    sb.append("Nível: ").append(nivel).append("\n");
-		    sb.append("Grau: ").append(grauS).append("\n");
-
+		    sb.append("Raridade: ").append(getRaridade()).append("\n");
+		    sb.append("Grau: ").append(grauS).append("\nCartas obtidas: " + copias + "/" + metaCopias + "\n");
+		    sb.append("Nível: ").append(nivel).append("   Xp: " + experiencia + "/" + metaExperiencia).append("\n");
+		    sb.append("Tipo: ").append(getTipo()).append("\n");
+		    sb.append("Classe: ").append(getClasse()).append("\n");
 		    sb.append("Vida: ").append(barraDeVida()).append("\n");
 		    sb.append("Ataque: ").append(getAtaqueFinal()).append("\n");
+		    sb.append("Chance de critico: ").append(chanceCritico).append("%\n");
+		    sb.append("Dano Crítico: ").append((int)(getAtaqueFinal() * danoCritico)).append(" = " + danoCritico * 100 + "%\n");
 		    sb.append("Defesa: ").append(getDefesaFinal()).append("%\n");
 		    sb.append("Proteção: ").append(protecao).append("\n");
-		    sb.append("Velocidade: ").append(getVelocidadeFinal()).append("\n\n");
-
-		    sb.append("Efeitos ativos:\n");
-		    if (efeitosAtivos.isEmpty()) {
-		        sb.append("— Nenhum\n");
-		    } else {
-		        for (Efeito e : efeitosAtivos) {
-		            sb.append("• ")
-		              .append(e.getNomeEfeito())
-		              .append(" (")
-		              .append(e.getDuracao())
-		              .append("t)\n");
-		        }
-		    }
+		    sb.append("Velocidade: ").append(getVelocidadeFinal());
 
 		    return sb.toString();
 		}
@@ -799,8 +797,80 @@ public abstract class Personagem {
 		        sb.append(h.getNome()).append("\n");
 		        sb.append(h.getDescricao()).append("\n");
 
-		        sb.append("Cooldown: ")
+		        sb.append("Cooldown Inicial: ")
 		          .append(h.getCooldownInicial())
+		          .append("\nCooldown:")
+		          .append(h.getCooldownMax());
+
+		        sb.append("\n\n");
+		    }
+
+		    return sb.toString();
+	 }
+	 public String listarPassivasUI() {
+		 return "Passivas:\n" + descricaoPassivas();
+		}
+
+
+	 public String listarStatusUIBatalha() {
+		    StringBuilder sb = new StringBuilder();
+		    String grauS = "";
+         for(int i = 0; this.getGrau() >= i; i++) {
+         	grauS += "🌟";
+         }
+
+		    sb.append(nome).append("\n");
+		    sb.append("Nível: ").append(nivel).append("\n");
+		    sb.append("Grau: ").append(grauS).append("\n");
+
+		    sb.append("Vida: ").append(barraDeVida()).append("\n");
+		    sb.append("Ataque: ").append(getAtaqueFinal()).append("\n");
+		    sb.append("Chance de critico: ").append(chanceCritico).append("%\n");
+		    sb.append("Dano Crítico: ").append((int)(getAtaqueFinal() * danoCritico)).append(" = " + danoCritico * 100 + "%\n");
+		    sb.append("Defesa: ").append(getDefesaFinal()).append("%\n");
+		    sb.append("Proteção: ").append(protecao).append("\n");
+		    sb.append("Velocidade: ").append(getVelocidadeFinal()).append("\n\n");
+		    
+		    sb.append("Passivas:\n").append(descricaoPassivas()).append("\n\n\n");
+
+		    sb.append("Efeitos ativos:\n");
+		    
+		    /*if (efeitosAtivos.isEmpty()) {
+		        sb.append("— Nenhum\n");
+		    } else {
+		        for (Efeito e : efeitosAtivos) {
+		            sb.append("• ")
+		              .append(e.getNomeEfeito())
+		              .append(" (")
+		              .append(e.getDuracao())
+		              .append("t)\n");
+		        }
+		    }*/
+		    sb.append(getEfeitosTexto());
+
+		    return sb.toString();
+		}
+	 
+	 public String listarHabilidadesUIBatalha() {
+		    StringBuilder sb = new StringBuilder();
+
+		    sb.append("Habilidades:\n\n");
+
+		    for (int i = 0; i < habilidades.length; i++) {
+		        Habilidade h = habilidades[i];
+
+		        sb.append(i + 1).append(") ");
+
+		        if (h == null) {
+		            sb.append("Vazio\n\n");
+		            continue;
+		        }
+
+		        sb.append(h.getNome()).append("\n");
+		        sb.append(h.getDescricao()).append("\n");
+
+		        sb.append("Cooldown: ")
+		          .append(h.getRecargaAtual())
 		          .append("/")
 		          .append(h.getCooldownMax());
 
@@ -815,27 +885,6 @@ public abstract class Personagem {
 
 		    return sb.toString();
 		}
-	 public String listarPassivasUI() {
-		    if (efeitosAtivos.isEmpty()) {
-		        return "Nenhuma passiva ativa.";
-		    }
-
-		    StringBuilder sb = new StringBuilder();
-
-		    for (Efeito e : efeitosAtivos) {
-		        if (e.getCategoria() == Efeito.Categoria.BUFF) {
-		            sb.append("• ")
-		              .append(e.getNomeEfeito())
-		              .append(": ")
-		              .append(e.getDescricao())
-		              .append("\n");
-		        }
-		    }
-
-		    return sb.length() == 0 ? "Nenhuma passiva ativa." : sb.toString();
-		}
-
-
 	
 	
 	

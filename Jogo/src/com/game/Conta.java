@@ -126,6 +126,7 @@ public class Conta {
             System.out.println("Novo personagem " + personagem.getRaridade() + " desbloqueado: " + personagem.getNome());
             return "Novo personagem " + personagem.getRaridade() + " desbloqueado: " + personagem.getNome();
         }
+        personagem.ganharCopias(1);
         System.out.println("Personagem " + personagem.getRaridade() +" repitido: " + personagem.getNome());
         return "Personagem " + personagem.getRaridade() +" repitido: " + personagem.getNome();
     }

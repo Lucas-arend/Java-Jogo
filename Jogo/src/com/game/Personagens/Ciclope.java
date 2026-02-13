@@ -34,11 +34,11 @@ public class Ciclope extends Personagem {
 	                1.25   // dano crítico
 	            )
 	        );
-		habilidades[0] = new Habilidade("Golpe brutal", " causa " + this.getAtaqueFinal() + " de dano.", Arrays.asList(CaracteristicasHabilidade.DANO), 0, 0);
-	    habilidades[1] = new Habilidade("Golpe duplo desacelerador", "Causa pouco dano 2 vezes e reduz a velocidade do alvo em 100% por 2 turnos.", Arrays.asList(CaracteristicasHabilidade.DANO_BAIXO, CaracteristicasHabilidade.REDUCAO_DE_VELOCIDADE)
+		habilidades[0] = new Habilidade("Golpe brutal", " causa " + (int)(this.getAtaqueFinal() * 1.2) + " de dano.", Arrays.asList(CaracteristicasHabilidade.DANO), 0, 0);
+	    habilidades[1] = new Habilidade("Golpe duplo desacelerador", "Causa " + (int)(this.getAtaqueFinal() * 0.6) + " de dano 2 vezes e reduz a velocidade do alvo em 100% por 2 turnos.", Arrays.asList(CaracteristicasHabilidade.DANO_BAIXO, CaracteristicasHabilidade.REDUCAO_DE_VELOCIDADE)
 ,0, 0); // começa em CD
-	    habilidades[2] = new Habilidade("Fome", "Reduz o tempo de carga de Devorar em 1!",Arrays.asList(CaracteristicasHabilidade.REDUZIR_COOLDOWN), 0, 3);
-	    habilidades[3] = new Habilidade("Devorar", "Noucateia o alvo instantaneamente e se cura com a Vida Máxima do alvo.", Arrays.asList( CaracteristicasHabilidade.GOLPE_DIRETO, CaracteristicasHabilidade.DANO_LETAL,CaracteristicasHabilidade.CURA), 5, 5); // começa em CD
+	    habilidades[2] = new Habilidade("Fome", "Reduz o tempo de carga de Devorar em 1 e recebe um aumento de 25% de defesa por 2 turnos!",Arrays.asList(CaracteristicasHabilidade.REDUZIR_COOLDOWN), 0, 3);
+	    habilidades[3] = new Habilidade("Devorar", "Noucateia o alvo instantaneamente e se cura com 100% Vida Máxima do alvo e recebe um aumento de 20% na sua vida máxima.", Arrays.asList( CaracteristicasHabilidade.GOLPE_DIRETO, CaracteristicasHabilidade.DANO_LETAL,CaracteristicasHabilidade.CURA), 5, 5); // começa em CD
 				
 	}
 	
@@ -136,6 +136,18 @@ public class Ciclope extends Personagem {
 	protected void fimDoTurno(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	protected void adicionarImagem() {
+	    setCaminhoImagem("/resurces/Ciclope.png");
+		
+	}
+
+	@Override
+	protected String descricaoPassivas() {
+		// TODO Auto-generated method stub
+		return "O " + getNome() + " dobra o seu dano ao nocautear um adversário!";
 	}
 
 

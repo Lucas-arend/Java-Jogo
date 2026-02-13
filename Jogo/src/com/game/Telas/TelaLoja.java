@@ -1,5 +1,6 @@
 package com.game.Telas;
 
+import java.awt.BorderLayout;
 import java.awt.GridLayout;
 
 import javax.swing.*;
@@ -7,7 +8,6 @@ import javax.swing.*;
 import com.game.Conta;
 import com.game.ItemLoja;
 import com.game.Loja;
-import com.game.Loja.TipoLoja;
 
 public class TelaLoja extends JFrame{
 	/**
@@ -17,6 +17,12 @@ public class TelaLoja extends JFrame{
 	private Conta conta;
 	
 	private JTextArea txtDados;
+	JButton btnMontarDeck = new JButton("Montar Deck");
+	JButton btnLoja = new JButton("Loja");
+	JButton btnCampanha = new JButton("Campanha");
+	JButton btnBatalha1 = new JButton("Modo Campanha");
+	JButton btnBatalha2 = new JButton("Batalha Aleatória");
+	JButton btnBatalhasEspeciais = new JButton("Eventos");
 	
 
 	public TelaLoja(Conta conta) {
@@ -36,7 +42,7 @@ public class TelaLoja extends JFrame{
 	}
 	
 	private JPanel criarPainelBaus() {
-	    JPanel panel = new JPanel(new GridLayout(0, 1));
+	    JPanel panel = new JPanel();
 	    panel.setBorder(BorderFactory.createTitledBorder("Baús"));
 
 	    for (ItemLoja bau : Loja.listarBaus()) {
@@ -53,18 +59,9 @@ public class TelaLoja extends JFrame{
 	    return panel;
 	}
 
-	
-	private void voltar() {
-		setLayout(new GridLayout(3,2));
-		JButton btn = new JButton("VOLTAR");
-		btn.addActionListener(e -> {
-			setVisible(false);
-	        new TelaInicial(conta);
-		});
-		add(btn);
-	}
+
 	private JPanel criarPainelOfertas() {
-	    JPanel panel = new JPanel(new GridLayout(0, 1));
+	    JPanel panel = new JPanel(new BorderLayout());
 	    panel.setBorder(BorderFactory.createTitledBorder("Ofertas"));
 
 	    for (ItemLoja oferta : Loja.listarOfertas()) {
@@ -83,19 +80,25 @@ public class TelaLoja extends JFrame{
 
 
 
-
-	private JPanel criarPainelVoltar() {
-	    JPanel panel = new JPanel();
-	    JButton btn = new JButton("VOLTAR");
-
-	    btn.addActionListener(e -> {
-	        dispose();
-	        new TelaInicial(conta);
-	    });
-
-	    panel.add(btn);
-	    return panel;
+	
+	private void campanha() {
+		setVisible(false);
+		new TelaInicial(conta);
 	}
+	private void eventos() {
+		
+	}
+
+    private void montarDeck() {
+    	setVisible(false);
+    	new TelaSelecaoDeck(conta);
+    }
+    
+	private void abrirLoja() {
+		setVisible(false);
+		new TelaLoja(conta);
+	}
+
 
 	private void atualizarDados() {
 	    txtDados.setText(
@@ -110,13 +113,33 @@ public class TelaLoja extends JFrame{
 	
 	private void carregar() {
 	    getContentPane().removeAll();
-	    setLayout(new GridLayout(4, 1));
+        JPanel painel = new JPanel();
+        JPanel inferior = new JPanel(new GridLayout(1,4));
+        JPanel Interface = new JPanel();
+        JPanel dados = new JPanel(new GridLayout());
+        btnCampanha = new JButton("Campanha");
+    	btnMontarDeck = new JButton("Montar Deck");
+    	btnLoja = new JButton("Loja");
+    	
+    	inferior.add(btnLoja);
+    	inferior.add(btnMontarDeck);
+    	inferior.add(btnCampanha);
+    	inferior.add(btnBatalhasEspeciais);
+    	
+        btnCampanha.addActionListener(e -> campanha());
+        btnMontarDeck.addActionListener(e -> montarDeck());
+        btnLoja.addActionListener(e -> abrirLoja());
+        btnBatalhasEspeciais.addActionListener(e -> eventos());
+        
+	    dados.add(txtDados);
+	    Interface.add(criarPainelOfertas());
+	    Interface.add(criarPainelBaus());	    
+	    painel.setLayout(new BorderLayout());
 
-	    add(txtDados);
-	    add(criarPainelOfertas());
-	    add(criarPainelBaus());
-	    add(criarPainelVoltar());
-
+        painel.add(dados, BorderLayout.NORTH);
+        painel.add(Interface, BorderLayout.CENTER);
+        painel.add(inferior, BorderLayout.SOUTH);
+	    add(painel);
 	    revalidate();
 	    repaint();
 	}

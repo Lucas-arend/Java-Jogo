@@ -28,13 +28,13 @@ public class Batalha {
         int size1 = time1.size();
         for(int i = 0; i < size1; i++) {
         	time1.get(i).StatusNivel();
-        	time1.get(i).StatusGrau();
+        	//time1.get(i).StatusGrau();
         }
         
         int size2 = time2.size();
         for(int i = 0; i < size2; i++) {
         	time2.get(i).StatusNivel();
-        	time2.get(i).StatusGrau();
+        	//time2.get(i).StatusGrau();
         }
     }
 
@@ -77,6 +77,18 @@ public class Batalha {
         ativo1.resetarCooldowns(); // como você comentou antes
         System.out.println("Jogador trocou para: " + ativo1.getNome());
     }
+    public void trocarPersonagem() {
+        trocarPersonagemJogador();
+
+        // troca consome o turno
+        for (Personagem p : time1) {
+            p.fimDoTurno(ativo2, ativo1, time1, time2);
+        }
+        for (Personagem p : time2) {
+            p.fimDoTurno(ativo1, ativo2, time2, time1);
+        }
+    }
+
 
     private Personagem getProximoVivoDiferente(List<Personagem> time, Personagem atual) {
         for (Personagem p : time) {
@@ -88,81 +100,114 @@ public class Batalha {
     }
 
 
+
+
+
+    
+    
+    public void batalha(int indice) { 
+    	if (batalhaEncerrada()) {
+    
+            System.out.println("🏁 Batalha encerrada.");
+            return;
+        }
+
+        if (ativo1 == null || ativo2 == null) {
+            System.out.println("⚠️ Personagem ativo inexistente.");
+            return;
+        }
+
+        verificarTrocaAutomatica();
+
+        if (ativo1 == null || ativo2 == null) {
+            System.out.println("⚠️ Não há personagens suficientes para continuar.");
+            return;
+        }
+
+        // === PROCESSA INÍCIO DO TURNO ===
+        for (Personagem p : time1) {
+            p.processarEfeitosPorTurno();
+            p.inicioDoTurno(ativo2, ativo1, time1, time2);
+        }
+        for (Personagem p : time2) {
+            p.processarEfeitosPorTurno();
+            p.inicioDoTurno(ativo1, ativo2, time2, time1);
+        }
+
+        verificarTrocaAutomatica();
+
+        if (ativo1 == null || ativo2 == null) {
+            System.out.println("⚠️ Não há personagens suficientes para continuar.");
+            return;
+        }
+
+        // === TROCA DE PERSONAGEM ===
+        if (indice == 5) {
+            trocarPersonagem();
+            return; // IA NÃO ATACA
+        }
+        if (ativo2 == null) {
+            System.out.println("⚠️ Nenhum inimigo ativo disponível.");
+            return; // ou encerra a rodada
+        }
+
+        if (!ativo2.isVivo()) {
+            // lógica normal
+        	return;
+
+        }
+
+
+        // === ORDEM DE VELOCIDADE ===
+        if (ativo1.getVelocidadeFinal() >= ativo2.getVelocidadeFinal()) {
+            turnoJogador(indice);
+            if (ativo2.isVivo()) turnoIA();
+        } else {
+            turnoIA();
+            if (ativo1.isVivo()) turnoJogador(indice);
+        }
+
+        // === FIM DO TURNO ===
+        for (Personagem p : time1) {
+            p.fimDoTurno(ativo2, ativo1, time1, time2);
+        }
+        for (Personagem p : time2) {
+            p.fimDoTurno(ativo1, ativo2, time2, time1);
+        }
+
+        verificarTrocaAutomatica();
+
+        if (ativo1 == null || ativo2 == null) {
+            System.out.println("⚠️ Não há personagens suficientes para continuar.");
+            return;
+        }
+    }
+
     // =====================
     // TURNO (GUI)
     // =====================
 
     public void turnoJogador(int habilidadeIndex) {
+        if (!ativo1.isVivo() || !ativo2.isVivo()) return;
 
-    	if (ativo1 == null || ativo2 == null) return;
+        boolean usou = ativo1.usarHabilidades(
+            ativo2, habilidadeIndex, ativo1, time1, time2
+        );
 
-            if(ativo1.estaVivo() == false) this.ativo1 = getProximoVivo(time1, ativo1);
-            if(ativo2.estaVivo() == false) this.ativo2 = getProximoVivo(time2, ativo2);
+        if (!usou) return;
 
-            int tim1 = time1.size();
-            int tim2 = time2.size();
-            for (int i = 0; i < tim1; i++) {
-        	    if (time1.get(i) != null) time1.get(i).processarEfeitosPorTurno();
-            }
-        
-            for(int i = 0; i < tim2; i++) {
-        	    if (time2.get(i) != null) time2.get(i).processarEfeitosPorTurno();
-            }
-        
-            for (int i = 0; i < tim1; i++) {
-        	    time1.get(i).inicioDoTurno(ativo2, ativo1, time1, time2);
-            }
-            for (int i = 0; i < tim2; i++) {
-        	    time2.get(i).inicioDoTurno(ativo1, ativo2, time2, time1);
-            }
-        
-            verificarTrocaAutomatica();
-            if (habilidadeIndex == 5) {
-                trocarPersonagemJogador();
-                
-                // troca consome o turno → IA joga
-                turnoIA();
-                return;
-            }
+        ativo1.reduzirCooldowns();
+    }
 
-    	
-    		
-            // Jogador ataca
-
-            System.out.println("\n\n\n##Jogador##");
-            boolean usou = ativo1.usarHabilidades(ativo2, habilidadeIndex, ativo1, time1, time2);
-            if (!usou) return;
-
-            ativo1.reduzirCooldowns();
-            //verificarTrocaAutomatica();
-            
-            if (!timeTemVivos(time2)) return;
-            
-         
-    	// IA ataca
-            if (ativo1 == null || ativo2 == null) return;
-            if (!ativo1.isVivo() || !ativo2.isVivo()) return;
-
-            turnoIA();
-  
-
-            for(int i = 0; i < tim1; i++) {
-        	time1.get(i).fimDoTurno(ativo2, ativo1, time1, time2);
-            }
-            for(int i = 0; i < tim2; i++) {
-        	    time2.get(i).fimDoTurno(ativo1, ativo2, time2, time1);
-            }
-            verificarTrocaAutomatica();
-    	}
         
 
 
 
     private void turnoIA() {
+        if (ativo1 == null || ativo2 == null) return;
+        if (!ativo1.isVivo() || !ativo2.isVivo()) return;
 
         int indice = ia.escolherIndiceHabilidadeIA(ativo2, ativo1);
-
-        System.out.print("\n\n\n##IA## ");
 
         if (indice == -1) {
             ativo2.usarHabilidades(ativo1, 1, ativo2, time2, time1);

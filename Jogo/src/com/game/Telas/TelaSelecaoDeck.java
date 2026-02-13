@@ -5,10 +5,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.net.URL;
 
 import javax.swing.*;
-import javax.swing.text.JTextComponent;
-
 import com.game.Conta;
 import com.game.Personagem;
 
@@ -59,19 +58,25 @@ public class TelaSelecaoDeck extends JFrame {
         painelBotoes.add(botoes[1]);
         
         for (Personagem p : conta.getTodosPersonagens()) {
-        	if (p.getDesbloqueado()) {
+        	//if (p.getDesbloqueado()) {
 
             JPanel cartaPanel = new JPanel();
             cartaPanel.setLayout(new BorderLayout());
             cartaPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-            cartaPanel.setPreferredSize(new Dimension(180, 260));
+            cartaPanel.setPreferredSize(new Dimension(160, 260));
 
             // IMAGEM
-            JLabel imagem = new JLabel();
-            ImageIcon icon = new ImageIcon("imgs/" + p.getImagem()); // ex: blueEyes.png
-            Image img = icon.getImage().getScaledInstance(160, 200, Image.SCALE_SMOOTH);
-            imagem.setIcon(new ImageIcon(img));
-            imagem.setHorizontalAlignment(SwingConstants.CENTER);
+         // DENTRO DO SEU FOR (Personagem p : conta.getTodosPersonagens())
+            PainelImagem imagem = new PainelImagem(
+            	    new ImageIcon(getClass().getResource(p.getCaminhoImagem()))
+            	);
+
+            	imagem.setPreferredSize(new Dimension(150, 250));
+            	cartaPanel.add(imagem, BorderLayout.CENTER);
+
+
+
+
 
             // INFO
             JLabel nome = new JLabel(p.getNome(), SwingConstants.CENTER);
@@ -80,7 +85,7 @@ public class TelaSelecaoDeck extends JFrame {
             	grauS += "🌟";
             }
             JLabel grau = new JLabel(grauS + " Nv " + p.getNivel(), SwingConstants.CENTER);
-            JLabel raridade = new JLabel(p.getRaridade().toString(), SwingConstants.CENTER);
+            //JLabel raridade = new JLabel(p.getRaridade().toString(), SwingConstants.CENTER);
 
             // BOTÃO
             JButton botaoInfo = new JButton("Informações");
@@ -123,7 +128,7 @@ public class TelaSelecaoDeck extends JFrame {
 
 
             painelCartas.add(cartaPanel);
-       }
+       //}
         }
 
 

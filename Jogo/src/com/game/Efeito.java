@@ -139,7 +139,7 @@ public class Efeito {
         case NERF_ATTACK -> {
             valorAplicado = valor;
             alvo.setMultiplicadorDano(
-                alvo.getMultiplicadorDano() - ((valor / 100.0) / alvo.getResisRecucaoDano())
+                alvo.getMultiplicadorDano() - ((valor / 100.0) /*/ alvo.getResisRecucaoDano()*/)
             );
         }
 

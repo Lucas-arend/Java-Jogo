@@ -1,5 +1,6 @@
 package com.game.Telas;
 
+import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +18,10 @@ public class TelaInicial extends JFrame {
 	JTextArea TextDados = new JTextArea("");
 	JButton btnMontarDeck = new JButton("Montar Deck");
 	JButton btnLoja = new JButton("Loja");
-	JButton btnIniciar = new JButton("Iniciar Batalha");
+	JButton btnCampanha = new JButton("Campanha");
+	JButton btnBatalha1 = new JButton("Modo Campanha");
+	JButton btnBatalha2 = new JButton("Batalha Aleatória");
+	JButton btnBatalhasEspeciais = new JButton("Eventos");
 
 	
 	
@@ -27,33 +31,47 @@ public class TelaInicial extends JFrame {
 		setTitle("Tela inicial!");
 		setSize(900, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        
+        JPanel painel = new JPanel(new GridLayout());
+        JPanel inferior = new JPanel(new GridLayout());
+        JPanel Interface = new JPanel();
+        JPanel dados = new JPanel();
 
-        btnIniciar = new JButton("Iniciar Batalha");
+        
+        btnBatalha1 = new JButton("Modo Campanha");
+        btnBatalha2 = new JButton("Batalha Aleatória");
+        btnBatalhasEspeciais = new JButton("Eventos");
+        btnCampanha = new JButton("Campanha");
         TextDados = new JTextArea("Nível: " + conta.getNivel() + "  Nome: " + conta.getUsuario() + " Moedas: " + conta.getMoedas() + " Gemas: " + conta.getGemas());
     	btnMontarDeck = new JButton("Montar Deck");
     	btnLoja = new JButton("Loja");
+    	dados.add(TextDados);
+    	Interface.add(btnBatalha1);
+    	Interface.add(btnBatalha2);
+    	inferior.add(btnLoja);
+    	inferior.add(btnMontarDeck);
+    	inferior.add(btnCampanha);
+    	inferior.add(btnBatalhasEspeciais);
     	
-        btnIniciar.addActionListener(e -> iniciarBatalha());
+    	
+        btnBatalha2.addActionListener(e -> iniciarBatalhaAleatoria());
+        btnBatalha1.addActionListener(e -> iniciarBatalhaCampanha());
+        btnCampanha.addActionListener(e -> campanha());
         btnMontarDeck.addActionListener(e -> montarDeck());
         btnLoja.addActionListener(e -> abrirLoja());
-
-        carregar();
+        btnBatalhasEspeciais.addActionListener(e -> eventos());
+        painel.setLayout(new BorderLayout());
+        painel.add(dados, BorderLayout.NORTH);
+        painel.add(Interface, BorderLayout.CENTER);
+        painel.add(inferior, BorderLayout.SOUTH);
+        add(painel);
         atualizarDadosConta();
         setLocationRelativeTo(null);
     	setVisible(true);
 	}
 	
-
-	private void carregar() {
-		getContentPane().removeAll();
-		setLayout(new GridLayout(4, 1));
-	      add(TextDados);
-	        add(btnMontarDeck);
-	        add(btnLoja);
-	    	add(btnIniciar);
-	}
 	
-	private void iniciarBatalha() {
+	private void iniciarBatalhaAleatoria() {
 
 	    if (conta.getDeck().isEmpty()) {
 	        JOptionPane.showMessageDialog(this,
@@ -79,6 +97,17 @@ public class TelaInicial extends JFrame {
 
 	    setVisible(false);
 	    new TelaBatalha(new Batalha(timeJogador, timeIA, conta));
+	}
+	
+	private void iniciarBatalhaCampanha() {
+		
+	}
+	
+	private void campanha() {
+		
+	}
+	private void eventos() {
+		
 	}
 
     
