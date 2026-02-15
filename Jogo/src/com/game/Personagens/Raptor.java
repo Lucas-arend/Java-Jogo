@@ -36,10 +36,10 @@ public class Raptor extends Personagem {
 	                1.25   // dano crítico
 	            )
 	        );
-		habilidades[0] = new Habilidade("Ataque Furtivo", "Um ataque rápido que causa " + this.getAtaqueFinal() + " de dano ao alvo.", Arrays.asList(CaracteristicasHabilidade.DANO), 0, 0);
-	    habilidades[1] = new Habilidade("Investida Rápida", "Aumenta a velocidade em 30% por 2 turnos e ganha " + (int) (this.getAtaqueFinal() * 1.5) + " de protecao por 2 turnos.", Arrays.asList(CaracteristicasHabilidade.AUMENTO_DE_VELOCIDADE, CaracteristicasHabilidade.PROTECAO), 1, 3); // começa em CD
-	    habilidades[2] = new Habilidade("Garras Cortantes", "Um ataque poderoso que causa " + (int) (this.getAtaqueFinal() * 2) + " de dano ao alvo.", Arrays.asList(CaracteristicasHabilidade.DANO_ALTO), 2, 2);
-	    habilidades[3] = new Habilidade("Rugido Intimidante", "Reduz o ataque do alvo em 100% por 1 turno.", Arrays.asList(CaracteristicasHabilidade.REDUCAO_DE_ATAQUE), 2, 2); // começa em CD
+		habilidades[0] = new Habilidade("Ataque Furtivo", descricaoHabilidade1(), Arrays.asList(CaracteristicasHabilidade.DANO), 0, 0);
+	    habilidades[1] = new Habilidade("Investida Rápida", descricaoHabilidade2(), Arrays.asList(CaracteristicasHabilidade.AUMENTO_DE_VELOCIDADE, CaracteristicasHabilidade.PROTECAO), 1, 3); // começa em CD
+	    habilidades[2] = new Habilidade("Garras Cortantes", descricaoHabilidade3(), Arrays.asList(CaracteristicasHabilidade.DANO_ALTO), 2, 2);
+	    habilidades[3] = new Habilidade("Rugido Intimidante", descricaoHabilidade4(), Arrays.asList(CaracteristicasHabilidade.REDUCAO_DE_ATAQUE), 2, 2); // começa em CD
     }
     
     
@@ -57,54 +57,7 @@ public class Raptor extends Personagem {
         return copia;
     }
 
-	public boolean usarHabilidades(Personagem alvo, int valor, Personagem atacante, List<Personagem> time1, List<Personagem> time2) {
-		Habilidade habilidade = habilidades[valor - 1];
-
-	    if (!habilidade.podeUsar()) {
-	        System.out.println(
-	            habilidade.getNome() + " está em recarga por "
-	            + habilidade.getCooldownAtual() + " turno(s)."
-	        );
-	        return false; // ❌ NÃO gastou turno
-	    }
-
-	    habilidade.usar(); // ativa cooldown
-
-	    if (valor == 1) {
-	        System.out.println(this.getNome() + " usa "+ this.getHabilidadeNome1() +" em " + alvo.getNome() + "!");
-	        alvo.receberDano(this.getAtaqueFinal(), this, time1, time2);
-	        System.out.println(alvo.getNome() + " recebe " + this.getAtaqueFinal() + " de dano!");
-	    }
-
-	    else if (valor == 2) {
-	        System.out.println(this.getNome() + " usa Investida Rápida!");
-	        this.aplicarEfeito(ListaEfeitos.aumentoVelocidade(30, 2));
-	        int protecao = (int) (this.getAtaqueFinal() * 1.5);
-	        this.aplicarEfeito(ListaEfeitos.protecao(protecao, 2)); // escudo temporário
-	        System.out.println(this.getNome() + " aumenta sua velocidade em 30 pontos por 2 turnos e ganha um escudo temporário de " + protecao + "!");
-	    }
-
-	    else if (valor == 3) {
-	        System.out.println(this.getNome() + " usa Garras Cortantes em " + alvo.getNome() + "!");
-	        int dano = this.getAtaqueFinal() * 2;
-	        alvo.receberDano(dano, this, time1, time2);
-	        System.out.println(alvo.getNome() + " recebe " + dano + " de dano!");
-	    }
-
-	    else if (valor == 4) {
-	        System.out.println(this.getNome() + " usa Rugido Intimidante!");
-	        int reducaoAtaque = (int) (alvo.getAtaqueFinal());// reduz 100% do ataque
-	        alvo.aplicarEfeito(ListaEfeitos.reducaoAtaque(reducaoAtaque, 1));
-	        System.out.println(alvo.getNome() + " tem seu ataque reduzido em " + reducaoAtaque + " pontos por 1 turno!");	
-	    }
-
-	    else {
-	        System.out.println("Habilidade inválida.");
-	    }
-	    return true; // ✅ gastou turno
-	}
-
-
+	
 	@Override
 	protected void adicionarHabilidade(Habilidade copiar) {
 		// TODO Auto-generated method stub
@@ -113,27 +66,27 @@ public class Raptor extends Personagem {
 
 
 	@Override
-	protected void aoAtacar(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
+	protected void aoAtacar(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		
 	}
 
 
 	@Override
-	protected void aoSerAtacado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
+	protected void aoSerAtacado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		// TODO Auto-generated method stub
 		
 	}
 
 
 	@Override
-	protected void AoNocautear(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
+	protected void AoNocautear(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		// TODO Auto-generated method stub
 		
 	}
 
 
 	@Override
-	protected void Nocauteado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
+	protected void Nocauteado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -164,6 +117,77 @@ public class Raptor extends Personagem {
 	protected String descricaoPassivas() {
 		// TODO Auto-generated method stub
 		return "Sem passivas disponíveis!";
+	}
+
+
+	@Override
+	protected boolean Habilidade1(Habilidade habilidade1, Personagem alvo, Personagem atacante, List<Personagem> time1,
+			List<Personagem> time2) {
+		System.out.println(this.getNome() + " usa "+ this.getHabilidadeNome1() +" em " + alvo.getNome() + "!");
+        alvo.receberDano(this.getAtaqueFinal(), this, time1, time2);
+        System.out.println(alvo.getNome() + " recebe " + this.getAtaqueFinal() + " de dano!");
+        return true;
+	}
+
+
+	@Override
+	protected boolean Habilidade2(Habilidade habilidade2, Personagem alvo, Personagem atacante, List<Personagem> time1,
+			List<Personagem> time2) {
+		System.out.println(this.getNome() + " usa Investida Rápida!");
+        this.aplicarEfeito(ListaEfeitos.aumentoVelocidade(30, 2));
+        int protecao = (int) (this.getAtaqueFinal() * 1.5);
+        this.aplicarEfeito(ListaEfeitos.protecao(protecao, 2)); // escudo temporário
+        System.out.println(this.getNome() + " aumenta sua velocidade em 30 pontos por 2 turnos e ganha um escudo temporário de " + protecao + "!");
+        return true;
+	}
+
+
+	@Override
+	protected boolean Habilidade3(Habilidade habilidade3, Personagem alvo, Personagem atacante, List<Personagem> time1,
+			List<Personagem> time2) {
+		System.out.println(this.getNome() + " usa Garras Cortantes em " + alvo.getNome() + "!");
+        int dano = this.getAtaqueFinal() * 2;
+        alvo.receberDano(dano, this, time1, time2);
+        System.out.println(alvo.getNome() + " recebe " + dano + " de dano!");		return true;
+	}
+
+
+	@Override
+	protected boolean Habilidade4(Habilidade habilidade4, Personagem alvo, Personagem atacante, List<Personagem> time1,
+			List<Personagem> time2) {
+		System.out.println(this.getNome() + " usa Rugido Intimidante!");
+        int reducaoAtaque = (int) (alvo.getAtaqueFinal());// reduz 100% do ataque
+        alvo.aplicarEfeito(ListaEfeitos.reducaoAtaque(reducaoAtaque, 1));
+        System.out.println(alvo.getNome() + " tem seu ataque reduzido em " + reducaoAtaque + " pontos por 1 turno!");	
+        return true;
+	}
+
+
+	@Override
+	protected String descricaoHabilidade1() {
+		// TODO Auto-generated method stub
+		return "Um ataque rápido que causa " + this.getAtaqueFinal() + " de dano ao alvo.";
+	}
+
+
+	@Override
+	protected String descricaoHabilidade2() {
+		// TODO Auto-generated method stub
+		return "Aumenta a velocidade em 30% por 2 turnos e ganha " + (int) (this.getAtaqueFinal() * 1.5) + " de protecao por 2 turnos.";
+	}
+
+
+	@Override
+	protected String descricaoHabilidade3() {
+		// TODO Auto-generated method stub
+		return "Um ataque poderoso que causa " + (int) (this.getAtaqueFinal() * 2) + " de dano ao alvo.";
+	}
+
+
+	@Override
+	protected String descricaoHabilidade4() {
+		// TODO Auto-generated method stub
+		return "Reduz o ataque do alvo em 100% por 1 turno.";
 	}
     
 }

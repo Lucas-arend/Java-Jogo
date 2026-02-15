@@ -34,51 +34,13 @@ public class Ciclope extends Personagem {
 	                1.25   // dano crítico
 	            )
 	        );
-		habilidades[0] = new Habilidade("Golpe brutal", " causa " + (int)(this.getAtaqueFinal() * 1.2) + " de dano.", Arrays.asList(CaracteristicasHabilidade.DANO), 0, 0);
-	    habilidades[1] = new Habilidade("Golpe duplo desacelerador", "Causa " + (int)(this.getAtaqueFinal() * 0.6) + " de dano 2 vezes e reduz a velocidade do alvo em 100% por 2 turnos.", Arrays.asList(CaracteristicasHabilidade.DANO_BAIXO, CaracteristicasHabilidade.REDUCAO_DE_VELOCIDADE)
-,0, 0); // começa em CD
-	    habilidades[2] = new Habilidade("Fome", "Reduz o tempo de carga de Devorar em 1 e recebe um aumento de 25% de defesa por 2 turnos!",Arrays.asList(CaracteristicasHabilidade.REDUZIR_COOLDOWN), 0, 3);
-	    habilidades[3] = new Habilidade("Devorar", "Noucateia o alvo instantaneamente e se cura com 100% Vida Máxima do alvo e recebe um aumento de 20% na sua vida máxima.", Arrays.asList( CaracteristicasHabilidade.GOLPE_DIRETO, CaracteristicasHabilidade.DANO_LETAL,CaracteristicasHabilidade.CURA), 5, 5); // começa em CD
+		habilidades[0] = new Habilidade("Golpe brutal", descricaoHabilidade1(), Arrays.asList(CaracteristicasHabilidade.DANO), 0, 0);
+	    habilidades[1] = new Habilidade("Golpe duplo desacelerador", descricaoHabilidade2(), Arrays.asList(CaracteristicasHabilidade.DANO_BAIXO, CaracteristicasHabilidade.REDUCAO_DE_VELOCIDADE),0, 0); // começa em CD
+	    habilidades[2] = new Habilidade("Fome", descricaoHabilidade3(),Arrays.asList(CaracteristicasHabilidade.REDUZIR_COOLDOWN), 0, 3);
+	    habilidades[3] = new Habilidade("Devorar", descricaoHabilidade4(), Arrays.asList( CaracteristicasHabilidade.GOLPE_DIRETO, CaracteristicasHabilidade.DANO_LETAL,CaracteristicasHabilidade.CURA), 5, 5); // começa em CD
 				
 	}
-	
-	public boolean usarHabilidades(Personagem alvo, int valor, Personagem atacante, List<Personagem> time1, List<Personagem> time2) {
-		Habilidade habilidade = habilidades[valor - 1];
-		
-		if(!habilidade.podeUsar()) {
-	        System.out.println(habilidade.getNome() + " está em recarga por "
-	                + habilidade.getCooldownAtual() + " turno(s).");
-	        return false; // ❌ NÃO gastou turno
-	    }
 
-	    habilidade.usar(); // ativa cooldown
-		
-	    if(valor == 1) {
-	    	int dano = (int) (this.getAtaqueFinal() * 1.2);
-	    	alvo.receberDano(dano, this, time1, time2);
-	    	System.out.println(alvo.getNome() + " recebe " + dano + " de dano!");
-	    } else if (valor == 2) {
-	    	alvo.aplicarEfeito(com.game.ListaEfeitos.desaceleracao(100, 2));
-	    	int dano = (int) (this.getAtaqueFinal() * 0.6);
-	    	alvo.receberDano(dano, this, time1, time2);
-	    	alvo.receberDano(dano, this, time1, time2);
-	    	System.out.println(alvo.getNome() + " recebe " + dano + " de dano 2 vezes e perde 100% da velocidade por 2 turnos!");
-	    } else if (valor == 3) {
-	    	this.habilidades[3].reduzirCooldown();
-	    	this.aplicarEfeito(ListaEfeitos.aumentoDefesa(25, 2));
-	    } else {
-	    	int cura = (int) (alvo.getVidaMaxima());
-	    	alvo.danoDireto(alvo.getVidaMaxima(), this, time1, time2);
-	    	this.setVidaMaxima((int) (this.getVidaMaxima() + (this.getVidaMaximaInicial() * 0.2)));
-	    	this.curar(cura);
-	    	System.out.println(alvo.getNome() + " é nocauteado e devorado por " + this.getNome() + " que rcupera vida equivalente à vida máxima de " + alvo.getNome() + " (" + cura + ")!");
-	    }
-	    
-		
-		// TODO Auto-generated method stub
-		return true;
-	}
-	
 	@Override
 	protected void adicionarHabilidade(Habilidade h) {
 	    for (int i = 0; i < habilidades.length; i++) {
@@ -103,25 +65,25 @@ public class Ciclope extends Personagem {
 	}
 
 	@Override
-	protected void aoAtacar(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
+	protected void aoAtacar(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void aoSerAtacado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
+	protected void aoSerAtacado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void AoNocautear(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
+	protected void AoNocautear(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		this.aplicarEfeito(ListaEfeitos.aumentoAtaque(100, 2));
 		
 	}
 
 	@Override
-	protected void Nocauteado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
+	protected void Nocauteado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -148,6 +110,69 @@ public class Ciclope extends Personagem {
 	protected String descricaoPassivas() {
 		// TODO Auto-generated method stub
 		return "O " + getNome() + " dobra o seu dano ao nocautear um adversário!";
+	}
+
+	@Override
+	protected boolean Habilidade1(Habilidade habilidade1, Personagem alvo, Personagem atacante, List<Personagem> time1,
+			List<Personagem> time2) {
+    	int dano = (int) (this.getAtaqueFinal() * 1.2);
+    	alvo.receberDano(dano, this, time1, time2);
+    	System.out.println(alvo.getNome() + " recebe " + dano + " de dano!");
+    	return true;
+	}
+
+	@Override
+	protected boolean Habilidade2(Habilidade habilidade2, Personagem alvo, Personagem atacante, List<Personagem> time1,
+			List<Personagem> time2) {
+		alvo.aplicarEfeito(com.game.ListaEfeitos.desaceleracao(100, 2));
+    	int dano = (int) (this.getAtaqueFinal() * 0.6);
+    	alvo.receberDano(dano, this, time1, time2);
+    	alvo.receberDano(dano, this, time1, time2);
+    	System.out.println(alvo.getNome() + " recebe " + dano + " de dano 2 vezes e perde 100% da velocidade por 2 turnos!");
+		return true;
+	}
+
+	@Override
+	protected boolean Habilidade3(Habilidade habilidade3, Personagem alvo, Personagem atacante, List<Personagem> time1,
+			List<Personagem> time2) {
+		this.habilidades[3].reduzirCooldown();
+    	this.aplicarEfeito(ListaEfeitos.aumentoDefesa(25, 2));
+		return true;
+	}
+
+	@Override
+	protected boolean Habilidade4(Habilidade habilidade4, Personagem alvo, Personagem atacante, List<Personagem> time1,
+			List<Personagem> time2) {
+		int cura = (int) (alvo.getVidaMaxima());
+    	alvo.danoDireto(alvo.getVidaMaxima(), this, time1, time2);
+    	this.setVidaMaxima((int) (this.getVidaMaxima() + (this.getVidaMaximaInicial() * 0.2)));
+    	this.curar(cura);
+    	System.out.println(alvo.getNome() + " é nocauteado e devorado por " + this.getNome() + " que rcupera vida equivalente à vida máxima de " + alvo.getNome() + " (" + cura + ")!");
+		return true;
+	}
+
+	@Override
+	protected String descricaoHabilidade1() {
+		// TODO Auto-generated method stub
+		return "Causa " + (int)(this.getAtaqueFinal() * 1.2) + " de dano.";
+	}
+
+	@Override
+	protected String descricaoHabilidade2() {
+		// TODO Auto-generated method stub
+		return "Causa " + (int)(this.getAtaqueFinal() * 0.6) + " de dano 2 vezes e reduz a velocidade do alvo em 100% por 2 turnos.";
+	}
+
+	@Override
+	protected String descricaoHabilidade3() {
+		// TODO Auto-generated method stub
+		return "Reduz o tempo de carga de Devorar em 1 e recebe um aumento de 25% de defesa por 2 turnos!";
+	}
+
+	@Override
+	protected String descricaoHabilidade4() {
+		// TODO Auto-generated method stub
+		return "Noucateia o alvo instantaneamente e se cura com 100% Vida Máxima do alvo e recebe um aumento de 20% na sua vida máxima.";
 	}
 
 

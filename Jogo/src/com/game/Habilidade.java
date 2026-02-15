@@ -123,6 +123,10 @@ public class Habilidade {
     public boolean estaDisponivel() {
         return cooldownAtual == 0;
     }
+    
+    public void setDescricao(String desc) {
+    	this.descricao = desc;
+    }
 
 
     public Habilidade copiar() {

@@ -29,10 +29,9 @@ public class Conta {
         this.setSenha(senha);
         
         this.desbloquearPersonagem(1);
-        this.desbloquearPersonagem(7);
         this.desbloquearPersonagem(4);
         this.desbloquearPersonagem(2);
-        this.desbloquearPersonagem(5);
+        
         
         this.moedas = 1000;
         this.gemas = 50;

@@ -34,10 +34,10 @@ public class Golem_De_Pedra extends Personagem{
 	                1.25   // dano crítico
 	            )
 	        );
-		habilidades[0] = new Habilidade("Golpe resiliente", " causa " + this.getAtaqueFinal() + " dedano e aumenta sua defesa em 10% por 1 turno.", Arrays.asList(CaracteristicasHabilidade.DANO, CaracteristicasHabilidade.DEFESA), 0, 0);
-	    habilidades[1] = new Habilidade("Absorção de defesa", "Reduz a defesa de todo o time adversário em 100% e aumenta a propria defesa de acordo com o total de defeza reduzido por 2 turnos.", Arrays.asList(CaracteristicasHabilidade.DEFESA, CaracteristicasHabilidade.MENOS_DEFESA), 1, 5); // começa em CD
-	    habilidades[2] = new Habilidade("Proteção do time", "Distribui sua defesa entre os aliados por 2 turnos, porém o golem fica com sua defesa anulada por 2 turnos.", Arrays.asList(CaracteristicasHabilidade.DEFESA, CaracteristicasHabilidade.MENOS_DEFESA), 3, 4);
-	    habilidades[3] = new Habilidade("Deslisamento", "Causa " + (int) (this.getAtaqueFinal() * 5) + " de dano em todos os adversários.", Arrays.asList(CaracteristicasHabilidade.DANO_LETAL), 4, 2); // começa em CD
+		habilidades[0] = new Habilidade("Golpe resiliente", descricaoHabilidade1(), Arrays.asList(CaracteristicasHabilidade.DANO, CaracteristicasHabilidade.DEFESA), 0, 0);
+	    habilidades[1] = new Habilidade("Absorção de defesa", descricaoHabilidade2(), Arrays.asList(CaracteristicasHabilidade.DEFESA, CaracteristicasHabilidade.MENOS_DEFESA), 1, 5); // começa em CD
+	    habilidades[2] = new Habilidade("Proteção do time", descricaoHabilidade3(), Arrays.asList(CaracteristicasHabilidade.DEFESA, CaracteristicasHabilidade.MENOS_DEFESA), 3, 4);
+	    habilidades[3] = new Habilidade("Deslisamento", descricaoHabilidade4(), Arrays.asList(CaracteristicasHabilidade.DANO_LETAL), 4, 2); // começa em CD
 
 	}
 
@@ -54,67 +54,6 @@ public class Golem_De_Pedra extends Personagem{
 	    return copia;
 	}
 	
-	@Override
-	public boolean usarHabilidades(Personagem alvo, int valor, Personagem atacante, List<Personagem> time1,
-			List<Personagem> time2) {
-		Habilidade habilidade = habilidades[valor - 1];
-		
-		
-
-	    if (!habilidade.podeUsar()) {
-	        System.out.println(habilidade.getNome() + " está em recarga por "
-	                + habilidade.getCooldownAtual() + " turno(s).");
-	        return false; // ❌ NÃO gastou turno
-	    }
-
-	    habilidade.usar(); // ativa cooldown
-	    
-	    
-	    
-	    
-	 // Implementação das habilidades do Golem de Perdra
-	 			if (valor == 1) {
-					int danoInicial = this.getAtaqueFinal(); // Dano base da investida
-					this.aplicarEfeito(ListaEfeitos.aumentoDefesa(10, 1));
-	 				alvo.receberDano(danoInicial, this, time1, time2);
-	 			}else if(valor == 2) {
-	 				int val = time2.size();
-	 				int def = 0;
-	 				for(int i = 0; i < val; i++) {
-	 					if(time2.get(i).getDefesa() > 0) {
-	 						int temp = time2.get(i).getDefesa();
-	 						time2.get(i).aplicarEfeito(ListaEfeitos.reducaoDefesa(temp, 2));
-	 						def += temp;
-	 					System.out.println(time2.get(i).getNome() + " Tem sua defesa reduzida em "+ temp + "% por "+ 1 + " turno).");
-	 					}
-	 					
-	 				}
-	 				this.aplicarEfeito(ListaEfeitos.aumentoDefesa(def, 2));
-	 			}else if(valor == 3) {
-	 				int val = this.getDefesaFinal();
-	 				int def = (int) (val / (time1.size() - 1));
-	 				this.aplicarEfeito(ListaEfeitos.reducaoDefesa(val, 2));
-	 				for(int i = 0; i < time1.size(); i++) {
-	 					if(time1.get(i).getNome() != this.getNome()) {
-	 						time1.get(i).aplicarEfeito(ListaEfeitos.aumentoDefesa(def, 2));
-	 					}
-	 				}
-	 			}else if(valor == 4) {
-	 				int val = time2.size();
-	 				int dano = (int) (this.getAtaqueFinal() * 5);
-	 				for(int i = 0; i < val; i++) {
-	 					if(time2.get(i).getDefesa() > 0) {
-	 						time2.get(i).receberDano(dano, atacante, time1, time2);
-	 					System.out.println(time2.get(i).getNome() + " recebe "+ dano + " de dano.");
-	 					}
-	 					
-	 				}
-	 			}
-	 			else {
-		System.out.println("Habilidade inválida.");
-	}
-		return true;
-	}
 	
 	@Override
 	protected void adicionarHabilidade(Habilidade h) {
@@ -128,25 +67,25 @@ public class Golem_De_Pedra extends Personagem{
 	}
 
 	@Override
-	protected void aoAtacar(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
+	protected void aoAtacar(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void aoSerAtacado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
+	protected void aoSerAtacado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void AoNocautear(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
+	protected void AoNocautear(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void Nocauteado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
+	protected void Nocauteado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -190,6 +129,84 @@ public class Golem_De_Pedra extends Personagem{
 	protected String descricaoPassivas() {
 		// TODO Auto-generated method stub
 		return "O " + getNome() + " reduz a cura de todos na batalha em 100%!";
+	}
+
+	@Override
+	protected boolean Habilidade1(Habilidade habilidade1, Personagem alvo, Personagem atacante, List<Personagem> time1,
+			List<Personagem> time2) {
+		int danoInicial = this.getAtaqueFinal(); // Dano base da investida
+		this.aplicarEfeito(ListaEfeitos.aumentoDefesa(10, 1));
+			alvo.receberDano(danoInicial, this, time1, time2);		return true;
+	}
+
+	@Override
+	protected boolean Habilidade2(Habilidade habilidade2, Personagem alvo, Personagem atacante, List<Personagem> time1,
+			List<Personagem> time2) {
+			int val = time2.size();
+			int def = 0;
+			for(int i = 0; i < val; i++) {
+				if(time2.get(i).getDefesa() > 0) {
+					int temp = time2.get(i).getDefesa();
+					time2.get(i).aplicarEfeito(ListaEfeitos.reducaoDefesa(temp, 2));
+					def += temp;
+				System.out.println(time2.get(i).getNome() + " Tem sua defesa reduzida em "+ temp + "% por "+ 1 + " turno).");
+				}
+				
+			}
+			this.aplicarEfeito(ListaEfeitos.aumentoDefesa(def, 2));		return true;
+	}
+
+	@Override
+	protected boolean Habilidade3(Habilidade habilidade3, Personagem alvo, Personagem atacante, List<Personagem> time1,
+			List<Personagem> time2) {
+			int val = this.getDefesaFinal();
+				int def = (int) (val / (time1.size() - 1));
+				this.aplicarEfeito(ListaEfeitos.reducaoDefesa(val, 2));
+				for(int i = 0; i < time1.size(); i++) {
+					if(time1.get(i).getNome() != this.getNome()) {
+						time1.get(i).aplicarEfeito(ListaEfeitos.aumentoDefesa(def, 2));
+					}
+				}
+				return true;
+	}
+
+	@Override
+	protected boolean Habilidade4(Habilidade habilidade4, Personagem alvo, Personagem atacante, List<Personagem> time1,
+			List<Personagem> time2) {
+		int val = time2.size();
+			int dano = (int) (this.getAtaqueFinal() * 5);
+			for(int i = 0; i < val; i++) {
+				if(time2.get(i).getDefesa() > 0) {
+					time2.get(i).receberDano(dano, atacante, time1, time2);
+				System.out.println(time2.get(i).getNome() + " recebe "+ dano + " de dano.");
+				}
+				
+			}		
+			return true;
+	}
+
+	@Override
+	protected String descricaoHabilidade1() {
+		// TODO Auto-generated method stub
+		return " causa " + this.getAtaqueFinal() + " dedano e aumenta sua defesa em 10% por 1 turno.";
+	}
+
+	@Override
+	protected String descricaoHabilidade2() {
+		// TODO Auto-generated method stub
+		return "Reduz a defesa de todo o time adversário em 100% e aumenta a propria defesa de acordo com o total de defeza reduzido por 2 turnos.";
+	}
+
+	@Override
+	protected String descricaoHabilidade3() {
+		// TODO Auto-generated method stub
+		return "Distribui sua defesa entre os aliados por 2 turnos, porém o golem fica com sua defesa anulada por 2 turnos.";
+	}
+
+	@Override
+	protected String descricaoHabilidade4() {
+		// TODO Auto-generated method stub
+		return "Causa " + (int) (this.getAtaqueFinal() * 5) + " de dano em todos os adversários.";
 	}
 
 }

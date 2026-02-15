@@ -1,6 +1,5 @@
 package com.game;
 
-import java.awt.Image;
 import java.util.*;
 import com.game.Efeito.TagEfeito;
 
@@ -216,6 +215,21 @@ public abstract class Personagem {
 	//Gerenciamento dos Status pelo nível (para ser mais fácil de balancear)
 	public void StatusNivel() {
 		resetarStatus();
+		if (this.nivel < 1) {
+			for(int i = 0; i <= this.nivel; i++) {
+				this.ataque += (int) (statusBase.ataque * 1.1);
+		        this.vidaMaxima += (int) (statusBase.vidaMaxima * 1.1);
+		        this.vida += (int) (statusBase.vida * 1.1);
+		        this.velocidade +=  nivel;
+		        this.vidaInicial += (int) (statusBase.vida * 1.1);
+		        this.ataqueInicial += (int)(statusBase.ataque * 1.1);
+		        this.vidaMaximaInicial += (int)(statusBase.vidaMaxima * 1.1);
+			}
+		
+		
+		}
+		
+		/*resetarStatus();
 		double valor1 = ((this.nivel - 1) * 0.1);
 		this.ataque += (int) (statusBase.ataque * valor1);
 		this.vidaMaxima += (int) (statusBase.vidaMaxima * valor1);
@@ -223,18 +237,21 @@ public abstract class Personagem {
 		this.velocidade +=  nivel;
 		this.vidaInicial += (int) (statusBase.vida * valor1);
 		this.ataqueInicial += (int)(statusBase.ataque * valor1);
-		this.vidaMaximaInicial += (int)(statusBase.vidaMaxima * valor1);
+		this.vidaMaximaInicial += (int)(statusBase.vidaMaxima * valor1);*/
 	}
 	
 	public void StatusGrau() {
-		double valor1 =(this.grau * 0.3);
-		this.ataque += (int) (statusBase.ataque * valor1);
-		this.vidaMaxima += (int) (statusBase.vidaMaxima * valor1);
-		this.vida += (int) (statusBase.vida * valor1);
-		this.velocidade += (grau * 3);
-		this.vidaInicial += (int) (statusBase.vida * valor1);
-		this.ataqueInicial += (int)(statusBase.ataque * valor1);
-		this.vidaMaximaInicial += (int)(statusBase.vidaMaxima * valor1);
+		double valor1 = (this.grau * 0.3);
+		for(int i = 0; i <= this.nivel; i++) {
+			this.ataque += (int) (statusBase.ataque * 1.3);
+		    this.vidaMaxima += (int) (statusBase.vidaMaxima * 1.3);
+		    this.vida += (int) (statusBase.vida * 1.3);
+		    this.velocidade += (grau * 3);
+		    this.vidaInicial += (int) (statusBase.vida * 1.3);
+		    this.ataqueInicial += (int)(statusBase.ataque * 1.3);
+		    this.vidaMaximaInicial += (int)(statusBase.vidaMaxima * 1.3);
+		}
+		
 	}
 	
 	protected void desbloquear() {
@@ -271,17 +288,31 @@ public abstract class Personagem {
 	
 	protected abstract void adicionarHabilidade(Habilidade copiar);
 	
-	protected abstract void aoAtacar(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2);
+	protected abstract boolean Habilidade1(Habilidade habilidade1, Personagem alvo, Personagem atacante, List<Personagem> time1, List<Personagem> time2);
 	
-	protected abstract void aoSerAtacado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2);
+	protected abstract boolean Habilidade2(Habilidade habilidade2, Personagem alvo, Personagem atacante, List<Personagem> time1, List<Personagem> time2);
+
+	protected abstract boolean Habilidade3(Habilidade habilidade3, Personagem alvo, Personagem atacante, List<Personagem> time1, List<Personagem> time2);
+
+	protected abstract boolean Habilidade4(Habilidade habilidade4, Personagem alvo, Personagem atacante, List<Personagem> time1, List<Personagem> time2);
+
 	
-	protected abstract void AoNocautear(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2);
+	protected abstract void aoAtacar(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano);
 	
-	protected abstract void Nocauteado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2);
+	protected abstract void aoSerAtacado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano);
+	
+	protected abstract void AoNocautear(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano);
+	
+	protected abstract void Nocauteado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano);
 	
 	protected abstract void inicioDoTurno(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2);
 	
 	protected abstract void fimDoTurno(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2);
+	
+	protected abstract String descricaoHabilidade1();
+	protected abstract String descricaoHabilidade2();
+	protected abstract String descricaoHabilidade3();
+	protected abstract String descricaoHabilidade4();
 	
 	protected abstract String descricaoPassivas();
 
@@ -308,7 +339,42 @@ public abstract class Personagem {
 	}
 
 
-	public abstract boolean usarHabilidades(Personagem alvo, int valor, Personagem atacante, List<Personagem> time1, List<Personagem> time2);
+	public boolean usarHabilidades(Personagem alvo, int valor, Personagem atacante, List<Personagem> time1, List<Personagem> time2) {
+		Habilidade habilidade = habilidades[valor - 1];
+		
+		
+	    if (!habilidade.podeUsar()) {
+	        System.out.println(habilidade.getNome() + " está em recarga por "
+	                + habilidade.getCooldownAtual() + " turno(s).");
+	        return false; // ❌ NÃO gastou turno
+	    }
+
+	    habilidade.usar(); // ativa cooldown
+	    
+	    		// Implementação das habilidades do Vampiro
+	    		if (valor == 1) {
+	    			Habilidade1(habilidade, alvo, atacante, time1, time2);
+	    			return true;
+	    		}
+	    		else if (valor == 2) {
+	    			Habilidade2(habilidade, alvo, atacante, time1, time2);
+	    			return true;
+	    		} else if (valor == 3) {
+	    			Habilidade3(habilidade, alvo, atacante, time1, time2);
+	    			return true;
+	    		} else if (valor == 4) {
+	    			Habilidade4(habilidade, alvo, atacante, time1, time2);
+	    			return true;
+	    		}
+	    		else {
+	    			System.out.println("Habilidade inválida.");
+	    		}
+	    		
+	    
+	
+		return true;
+		
+	};
 	
 	public void curar(int quantidade) {
 	    if (!vivo) return;
@@ -335,7 +401,7 @@ public abstract class Personagem {
 	    return vida > 0;
 	}
 
-	public void nocautear(Personagem adversario, List<Personagem> time1, List<Personagem> time2, boolean ativar) {
+	public void nocautear(Personagem adversario, List<Personagem> time1, List<Personagem> time2, boolean ativar, int dano) {
 		if (vida > 0) {
 			vida = 0;
 		}
@@ -343,7 +409,7 @@ public abstract class Personagem {
 			this.vida = 0;
 			this.vivo = false;
 		}
-        if(ativar) this.Nocauteado(adversario, this, time1, null);
+        if(ativar) this.Nocauteado(adversario, this, time1, null, dano);
         
 		
 	}
@@ -364,9 +430,10 @@ public abstract class Personagem {
 	}
 	
 	// Aplica dano com consideração de defesa e proteção
-	public void receberDano(int dano, Personagem atacante,  List<Personagem> time1, List<Personagem> time2) {
+	public int receberDano(int dano, Personagem atacante,  List<Personagem> time1, List<Personagem> time2) {
 	    // 🔒 Segurança extra
-	    if (!vivo) return;
+	    if (!vivo) return 0;
+	    int danoSofrido = this.vida;
 	    int defesaFinal = Math.max(-100, Math.min(getDefesaFinal(), 100));
 	    double fatorDefesa = 1.0 - (defesaFinal / 100.0);
 	    int danoFinal;        
@@ -387,73 +454,82 @@ public abstract class Personagem {
 	    }
 	    // 🔥 Aplica dano
 	    vida -= danoFinal;
+	    danoSofrido -= vida;
+	    
 	    // 🔒 Nunca deixar HP negativo aqui
 	    if (vida < 0) vida = 0;     
 	    // 🔥 MORTE
 	    if (vida == 0) {
-	    	nocautear(atacante, time1, time2, true );
+	    	nocautear(atacante, time1, time2, true, danoSofrido);
 	    }   
 	    if (!vivo && atacante != null) {
-	        atacante.AoNocautear(this, atacante, time1, time2);
+	        atacante.AoNocautear(this, atacante, time1, time2, danoSofrido);
 	    }
 
 	    // 🔹 Passivas AO ATACAR
 	    if (atacante != null) {
-	        atacante.aoAtacar(this, atacante, time1, time2);
+	        atacante.aoAtacar(this, atacante, time1, time2, danoSofrido);
 	    }
 
 	    // 🔹 Passivas AO RECEBER DANO
 	    if (vida > 0 && atacante != null) {
-	        this.aoSerAtacado(atacante, this, time1, time2);
+	        this.aoSerAtacado(atacante, this, time1, time2, danoSofrido);
 	    }
 
 	    setUltimoAtacante(atacante);	
+	    return danoSofrido;
 	}
 	
 
 	
-	public void danoDireto(int dano, Personagem atacante, List<Personagem> time1, List<Personagem> time2) {
+	public int danoDireto(int dano, Personagem atacante, List<Personagem> time1, List<Personagem> time2) {
 		dano *= (int)(multiplicadorDano);
 	    Random random = new Random();
+	    int danoSofrido = this.vida;
 	    int sorteio = random.nextInt(100);
         if (sorteio <= chanceCritico) {
         	dano = (int) (dano * this.danoCritico);
         	System.out.println("\n\n\n\nCritico\n\n\n\n");
         }
 		this.vida -= dano;
+		danoSofrido -= vida;
 	    // 🔒 Nunca deixar HP negativo aqui
 	    if (vida < 0) vida = 0;     
 	    // 🔥 MORTE
 	    if (vida == 0) {
-	    	nocautear(atacante, time1, time2, true);
+	    	nocautear(atacante, time1, time2, true, danoSofrido);
 	    }   
 	    if (!vivo && atacante != null) {
-	        atacante.AoNocautear(this, atacante, time1, time2);
+	        atacante.AoNocautear(this, atacante, time1, time2, danoSofrido);
 	    }
 
 	    // 🔹 Passivas AO ATACAR
 	    if (atacante != null) {
-	        atacante.aoAtacar(this, atacante, time1, time2);
+	        atacante.aoAtacar(this, atacante, time1, time2, danoSofrido);
 	    }
 
 	    // 🔹 Passivas AO RECEBER DANO
 	    if (vida > 0 && atacante != null) {
-	        this.aoSerAtacado(atacante, this, time1, time2);
+	        this.aoSerAtacado(atacante, this, time1, time2, danoSofrido);
 	    }
 
 	    setUltimoAtacante(atacante);	
+	    return danoSofrido;
 	}
 
-	public void danoDOT(int dano, Personagem atacante,  List<Personagem> time1, List<Personagem> time2) {
-		if(!this.isVivo()) return;
+	public int danoDOT(int dano, Personagem atacante,  List<Personagem> time1, List<Personagem> time2) {
+		if(!this.isVivo()) return 0;
+		int danoSofrido = this.vida;
 	    this.vida -= dano;
+	    danoSofrido -= vida;
 	    // 🔒 Nunca deixar HP negativo aqui
 	    if (vida < 0) vida = 0;     
 	    // 🔥 MORTE
 	    if (vida == 0) {
-	    	nocautear(atacante, time1, time2, true);
+	    	nocautear(atacante, time1, time2, true, danoSofrido);
 	    }   
 	    setUltimoAtacante(atacante);	
+	    return danoSofrido;
 	}
 
 
@@ -726,16 +802,21 @@ public abstract class Personagem {
 	}
 	
 	public String barraDeVida() {
-		int totalBarras = 10;
+		int totalBarras = 20;
 		int barrasCheias = (int) Math.round(((double) vida / vidaMaxima ) * totalBarras);
 		int barrasVazias = totalBarras - barrasCheias;
 		StringBuilder barra = new StringBuilder("[");
-		for (int i = 0; i < barrasCheias; i++) {
+		if(!this.isVivo()) { barra.append("----------NOCAUTEADO!----------");}
+		else {
+			for (int i = 0; i < barrasCheias; i++) {
 			barra.append("█");
 		}
 		for (int i = 0; i < barrasVazias; i++) {
-			barra.append("_");
+			barra.append("░");
 		}
+		}
+		
+		
 		barra.append("]");
 		return barra.toString() + vida + "/" + vidaMaxima;
 	}
@@ -834,18 +915,7 @@ public abstract class Personagem {
 		    sb.append("Passivas:\n").append(descricaoPassivas()).append("\n\n\n");
 
 		    sb.append("Efeitos ativos:\n");
-		    
-		    /*if (efeitosAtivos.isEmpty()) {
-		        sb.append("— Nenhum\n");
-		    } else {
-		        for (Efeito e : efeitosAtivos) {
-		            sb.append("• ")
-		              .append(e.getNomeEfeito())
-		              .append(" (")
-		              .append(e.getDuracao())
-		              .append("t)\n");
-		        }
-		    }*/
+
 		    sb.append(getEfeitosTexto());
 
 		    return sb.toString();
@@ -867,8 +937,11 @@ public abstract class Personagem {
 		        }
 
 		        sb.append(h.getNome()).append("\n");
-		        sb.append(h.getDescricao()).append("\n");
-
+		        if(i == 0) {sb.append(descricaoHabilidade1()).append("\n");}
+		        else if(i == 1) {sb.append(descricaoHabilidade2()).append("\n");}
+		        else if(i == 2) {sb.append(descricaoHabilidade3()).append("\n");}
+		        else sb.append(descricaoHabilidade4()).append("\n");
+		        
 		        sb.append("Cooldown: ")
 		          .append(h.getRecargaAtual())
 		          .append("/")

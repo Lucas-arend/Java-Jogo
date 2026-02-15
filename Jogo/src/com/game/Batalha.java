@@ -28,13 +28,13 @@ public class Batalha {
         int size1 = time1.size();
         for(int i = 0; i < size1; i++) {
         	time1.get(i).StatusNivel();
-        	//time1.get(i).StatusGrau();
+        	time1.get(i).StatusGrau();
         }
         
         int size2 = time2.size();
         for(int i = 0; i < size2; i++) {
         	time2.get(i).StatusNivel();
-        	//time2.get(i).StatusGrau();
+        	time2.get(i).StatusGrau();
         }
     }
 

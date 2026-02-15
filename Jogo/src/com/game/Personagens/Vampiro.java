@@ -35,10 +35,10 @@ public class Vampiro extends Personagem {
                 1.50   // dano crítico
 			)
 		);
-		habilidades[0] = new Habilidade("Mordida Sanguinária", "Causa " + this.getAtaqueFinal() + " de dano e recupera " + (int) (this.getAtaqueFinal() / 2) + " de vida.", Arrays.asList(CaracteristicasHabilidade.DANO, CaracteristicasHabilidade.CURA), 0, 0);
-		habilidades[1] = new Habilidade("Neblina Sombria", "Cura 50% de sua vida e aumenta a vida máxima em 20%.", Arrays.asList(CaracteristicasHabilidade.AUMENTO_DE_VIDA_MAXIMA, CaracteristicasHabilidade.CURA_ALTA), 3, 4); // começa em CD
-		habilidades[2] = new Habilidade("Garras Vorazes", "Um ataque rápido que causa " + (int) (this.getAtaqueFinal() * 1.5) + " de dano e reduz a defesa do inimigo em 50% por 3 turnos.", Arrays.asList(CaracteristicasHabilidade.DANO_CONSIDERAVEL, CaracteristicasHabilidade.MENOS_DEFESA), 2, 2);
-		habilidades[3] = new Habilidade("Chama da Noite", "Causa " + (int) (this.getAtaqueFinal() /3) + " de dano ao inimigo por 5 turnos.", Arrays.asList(CaracteristicasHabilidade.DOT), 0, 1); // começa em CD
+		habilidades[0] = new Habilidade("Mordida Sanguinária", descricaoHabilidade1(), Arrays.asList(CaracteristicasHabilidade.DANO, CaracteristicasHabilidade.CURA), 0, 0);
+		habilidades[1] = new Habilidade("Neblina Sombria", descricaoHabilidade2(), Arrays.asList(CaracteristicasHabilidade.AUMENTO_DE_VIDA_MAXIMA, CaracteristicasHabilidade.CURA_ALTA), 3, 4); // começa em CD
+		habilidades[2] = new Habilidade("Garras Vorazes", descricaoHabilidade3(), Arrays.asList(CaracteristicasHabilidade.DANO_CONSIDERAVEL, CaracteristicasHabilidade.MENOS_DEFESA), 2, 2);
+		habilidades[3] = new Habilidade("Chama da Noite", descricaoHabilidade4(), Arrays.asList(CaracteristicasHabilidade.DOT), 0, 1); // começa em CD
 	}
 
 	@Override
@@ -55,65 +55,6 @@ public class Vampiro extends Personagem {
 		return copia;
 	}
 	
-	public boolean usarHabilidades(Personagem alvo, int valor, Personagem atacante, List<Personagem> time1, List<Personagem> time2) {
-		Habilidade habilidade = habilidades[valor - 1];
-		
-		
-	    if (!habilidade.podeUsar()) {
-	        System.out.println(habilidade.getNome() + " está em recarga por "
-	                + habilidade.getCooldownAtual() + " turno(s).");
-	        return false; // ❌ NÃO gastou turno
-	    }
-
-	    habilidade.usar(); // ativa cooldown
-	    
-	    		// Implementação das habilidades do Vampiro
-	    		if (valor == 1) {
-	    			System.out.println(this.getNome() + " usa Mordida Sanguinária em " + alvo.getNome() + "!");
-	    			int danoInicial = this.getAtaqueFinal(); // Dano base da mordida
-	    			alvo.receberDano(danoInicial, this, time1, time2);
-	    			int vidaRecuperada = danoInicial / 2; // Recupera 50% do dano causado
-	    			this.curar(vidaRecuperada);
-	    			System.out.println(alvo.getNome() + " recebe " + danoInicial +
-	    			        " de dano!");
-	    			System.out.println(this.getNome() + " recupera " + vidaRecuperada +
-	    			        " de vida!");
-	    			return true;
-	    		}
-	    		else if (valor == 2) {
-	    			System.out.println(this.getNome() + " usa Neblina Sombria!");
-	    			// Aplica efeito de aumento de evasão
-	    			int cura = (int) (this.getVidaMaximaInicial() * 0.2);
-	    			this.setVidaMaxima((int) (this.getVidaMaxima() + cura)); // Exemplo de aumento de vida máxima
-	    			this.curar((int) (this.getVidaMaxima() / 2));
-	    			System.out.println(this.getNome() + " recebe aumento de 20% de vida máxima e cura 50% da vida máxima!");
-	    			return true;
-	    		} else if (valor == 3) {
-	    			System.out.println(this.getNome() + " usa Garras Vorazes em " + alvo.getNome() + "!");
-	    			int danoInicial = (int) (this.getAtaqueFinal() * 1.5); // Dano base do ataque
-	    			alvo.receberDano(danoInicial, this, time1, time2);
-	    			// Reduz a defesa do alvo
-	    			alvo.aplicarEfeito(ListaEfeitos.reducaoDefesa(50, 3).copiar());
-	    			System.out.println(alvo.getNome() + " recebe " + danoInicial +
-	    			        " de dano e tem sua defesa reduzida!");
-	    			return true;
-	    		} else if (valor == 4) {
-	    			System.out.println(this.getNome() + " usa Chama da Noite em " + alvo.getNome() + "!");
-	    			// Aplica efeito de dano contínuo
-	    			int dano = (int) (this.getAtaqueFinal() / 3);
-	    			alvo.aplicarEfeito(ListaEfeitos.danoProlongado("Chama da Noite", dano, 5).copiar());
-	    			System.out.println(alvo.getNome() + " sofrerá " + dano + "por 5 turnos!");
-	    			return true;
-	    		}
-	    		else {
-	    			System.out.println("Habilidade inválida.");
-	    		}
-	    		
-	    
-	
-		return true;
-	}
-	
 
 
 	@Override
@@ -124,26 +65,26 @@ public class Vampiro extends Personagem {
 
 
 	@Override
-	protected void aoAtacar(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
+	protected void aoAtacar(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void aoSerAtacado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
+	protected void aoSerAtacado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void AoNocautear(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
+	protected void AoNocautear(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		this.setVidaMaxima((int) (this.getVidaMaxima() + (this.getVidaMaximaInicial() * 0.2))); // Exemplo de aumento de vida máxima
 		this.curar((int) (this.getVidaMaxima()));
 		this.setAtaque((int)(getAtaque() + (getAtaqueInicial() * 0.2)));		
 	}
 
 	@Override
-	protected void Nocauteado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
+	protected void Nocauteado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -170,6 +111,81 @@ public class Vampiro extends Personagem {
 	protected String descricaoPassivas() {
 		// TODO Auto-generated method stub
 		return "O " + getNome() + " recebe um bonos de 20% de dano, 20% de vida máxima e recupera 100% da vida máxima ao nocautear o seu adversário!";
+	}
+
+	@Override
+	protected boolean Habilidade1(Habilidade habilidade1, Personagem alvo, Personagem atacante,
+			List<Personagem> time1, List<Personagem> time2) {
+		System.out.println(this.getNome() + " usa Mordida Sanguinária em " + alvo.getNome() + "!");
+		int danoInicial = this.getAtaqueFinal(); // Dano base da mordida
+		alvo.receberDano(danoInicial, this, time1, time2);
+		int vidaRecuperada = danoInicial / 2; // Recupera 50% do dano causado
+		this.curar(vidaRecuperada);
+		System.out.println(alvo.getNome() + " recebe " + danoInicial +
+		        " de dano!");
+		System.out.println(this.getNome() + " recupera " + vidaRecuperada +
+		        " de vida!");
+		return true;
+	}
+
+	@Override
+	protected boolean Habilidade2(Habilidade habilidade2, Personagem alvo, Personagem atacante,
+			List<Personagem> time1, List<Personagem> time2) {
+		System.out.println(this.getNome() + " usa Neblina Sombria!");
+		// Aplica efeito de aumento de evasão
+		int cura = (int) (this.getVidaMaximaInicial() * 0.2);
+		this.setVidaMaxima((int) (this.getVidaMaxima() + cura)); // Exemplo de aumento de vida máxima
+		this.curar((int) (this.getVidaMaxima() / 2));
+		System.out.println(this.getNome() + " recebe aumento de 20% de vida máxima e cura 50% da vida máxima!");
+		return true;
+	}
+
+	@Override
+	protected boolean Habilidade3(Habilidade habilidade3, Personagem alvo, Personagem atacante,
+			List<Personagem> time1, List<Personagem> time2) {
+		System.out.println(this.getNome() + " usa Garras Vorazes em " + alvo.getNome() + "!");
+		int danoInicial = (int) (this.getAtaqueFinal() * 1.5); // Dano base do ataque
+		alvo.receberDano(danoInicial, this, time1, time2);
+		// Reduz a defesa do alvo
+		alvo.aplicarEfeito(ListaEfeitos.reducaoDefesa(50, 3).copiar());
+		System.out.println(alvo.getNome() + " recebe " + danoInicial +
+		        " de dano e tem sua defesa reduzida!");
+		return true;
+	}
+
+	@Override
+	protected boolean Habilidade4(Habilidade habilidade4, Personagem alvo, Personagem atacante,
+			List<Personagem> time1, List<Personagem> time2) {
+		System.out.println(this.getNome() + " usa Chama da Noite em " + alvo.getNome() + "!");
+		// Aplica efeito de dano contínuo
+		int dano = (int) (this.getAtaqueFinal() / 3);
+		alvo.aplicarEfeito(ListaEfeitos.danoProlongado("Chama da Noite", dano, 5).copiar());
+		System.out.println(alvo.getNome() + " sofrerá " + dano + "por 5 turnos!");
+		return true;
+	}
+
+	@Override
+	protected String descricaoHabilidade1() {
+		// TODO Auto-generated method stub
+		return "Causa " + this.getAtaqueFinal() + " de dano e recupera " + (int) (this.getAtaqueFinal() / 2) + " de vida.";
+	}
+
+	@Override
+	protected String descricaoHabilidade2() {
+		// TODO Auto-generated method stub
+		return "Cura 50% de sua vida e aumenta a vida máxima em 20%.";
+	}
+
+	@Override
+	protected String descricaoHabilidade3() {
+		// TODO Auto-generated method stub
+		return "Um ataque rápido que causa " + (int) (this.getAtaqueFinal() * 1.5) + " de dano e reduz a defesa do inimigo em 50% por 3 turnos.";
+	}
+
+	@Override
+	protected String descricaoHabilidade4() {
+		// TODO Auto-generated method stub
+		return "Causa " + (int) (this.getAtaqueFinal() /3) + " de dano ao inimigo por 5 turnos.";
 	}
 
 	
