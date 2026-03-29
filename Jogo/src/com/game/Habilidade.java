@@ -4,29 +4,69 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Habilidade {
+	public enum TipoAlvo {
+	    INIMIGO,
+	    TODOS_INIMIGOS,
+	    ALIADO,
+	    TODOS_ALIADOS,
+	    SI_MESMO
+	}
 
-	private int cooldownInicial;
+	public enum TipoAnimacao {
+	    ATAQUE,
+	    MAGIA,
+	    CURA,
+	    BUFF,
+	    DEBUFF,
+	    ULTIMATE
+	}
+
+	public enum CategoriaHabilidade {
+	    OFENSIVA,
+	    DEFENSIVA,
+	    SUPORTE,
+	    CONTROLE,
+	    FINALIZADORA
+	}
+
+    private int cooldownInicial;
     private int cooldownMax;
     private int cooldownAtual;
-    private String descricao;
+    private int tamanho = 0;
+
+    
     private String nome;
-    private int dano;
-    private int cura;
-    private int danoDOT;
-    private int duracaoDOT;
+    private Personagem personagem;
+    //private String descricao;
+
     private List<CaracteristicasHabilidade> CH = new ArrayList<>();
-
-
     private final List<Efeito> efeitos = new ArrayList<>();
 
-    public Habilidade(String nome, String descricao, List<CaracteristicasHabilidade> cH2, int cooldown, int cooldownMax) {
+    // 🆕 sistema moderno
+    private int prioridade = 0;
+    private boolean ignoraSilencio = false;
+    private boolean ignoraControle = false;
+
+    private TipoAlvo alvo = TipoAlvo.INIMIGO;
+    private TipoAnimacao animacao = TipoAnimacao.ATAQUE;
+    private CategoriaHabilidade categoria = CategoriaHabilidade.OFENSIVA;
+
+    private int pesoIA = 1; // importância para IA
+
+    public Habilidade(String nome,
+                      List<CaracteristicasHabilidade> ch,
+                      int cooldownInicial,
+                      int cooldownMax, 
+                      Personagem p) {
+
         this.nome = nome;
-        this.descricao = descricao;
-        this.cooldownInicial = cooldown;
+        this.personagem = p;
+        this.cooldownInicial = cooldownInicial;
         this.cooldownMax = cooldownMax;
-        this.cooldownAtual = cooldown;
-        this.CH = new ArrayList<>();
-        this.CH.addAll(cH2);
+        this.cooldownAtual = cooldownInicial;
+
+        tamanho++;
+        this.CH.addAll(ch);
     }
 
     /* ================= EFEITOS ================= */
@@ -39,22 +79,26 @@ public class Habilidade {
         return efeitos;
     }
 
-    public boolean aplicaCura() {
+    public boolean causaDano() {
         return efeitos.stream().anyMatch(e ->
-            e.getKind() == Efeito.Kind.HEAL_OVER_TIME ||
-            e.getTag() == Efeito.TagEfeito.CURA
+                e.getKind() == Efeito.Kind.DAMAGE_OVER_TIME ||
+                e.getTag() == Efeito.TagEfeito.DANO
         );
     }
 
-    public boolean aplicaDano() {
+    public boolean causaCura() {
         return efeitos.stream().anyMatch(e ->
-            e.getKind() == Efeito.Kind.DAMAGE_OVER_TIME ||
-            e.getTag() == Efeito.TagEfeito.DANO
+                e.getKind() == Efeito.Kind.HEAL_OVER_TIME ||
+                e.getTag() == Efeito.TagEfeito.CURA
         );
     }
-    
-    public List<CaracteristicasHabilidade> getCaracteristicasHabilidade(){
-    	return CH;
+
+    public boolean aplicaControle() {
+        return efeitos.stream().anyMatch(e ->
+                e.getTag() == Efeito.TagEfeito.CONTROLE ||
+                e.getTag() == Efeito.TagEfeito.CONTROLE_TOTAL ||
+                e.getTag() == Efeito.TagEfeito.CONTROLE_PARCIAL
+        );
     }
 
     /* ================= COOLDOWN ================= */
@@ -71,75 +115,114 @@ public class Habilidade {
         if (cooldownAtual > 0) cooldownAtual--;
     }
 
-    public int getCooldownAtual() {
-        return cooldownAtual;
+    public void aumentarCooldown() {
+    	cooldownAtual++;
     }
-    
-    public void voltarCooldownInicial() {
-    	cooldownAtual = cooldownInicial;
-    }
-    
     public void resetarCooldown() {
-        this.cooldownAtual = 0;
-    }
-    public int getCooldownInicial() {
-    	return cooldownInicial;
+        cooldownAtual = cooldownInicial;
     }
     
-    public int getCooldownMax() {
-    	return cooldownMax;
+    public int size() {
+    	return tamanho;
     }
+
+    /* ================= EVENTOS ================= */
+
+    public void onHit(Personagem usuario, Personagem alvo) {}
+
+    public void onCrit(Personagem usuario, Personagem alvo) {}
+
+    public void onKill(Personagem usuario, Personagem alvo) {}
 
     /* ================= GETTERS ================= */
 
-    public String getNome() {
-        return nome;
+    public String getNome() { return nome; }
+    public int getCooldownAtual() { return cooldownAtual; }
+    public int getCooldownMax() { return cooldownMax; }
+
+    public int getPrioridade() { return prioridade; }
+    public boolean ignoraSilencio() { return ignoraSilencio; }
+    public boolean ignoraControle() { return ignoraControle; }
+
+    public TipoAlvo getAlvo() { return alvo; }
+    public TipoAnimacao getAnimacao() { return animacao; }
+    public CategoriaHabilidade getCategoria() { return categoria; }
+
+    public int getPesoIA() { return pesoIA; }
+
+    /* ================= SETTERS (builder style) ================= */
+
+    public Habilidade prioridade(int valor) {
+        this.prioridade = valor;
+        return this;
     }
 
-    public String getDescricao() {
-        return descricao;
-    }
-    
-    public int getDano() {
-        return dano;
+    public Habilidade alvo(TipoAlvo alvo) {
+        this.alvo = alvo;
+        return this;
     }
 
-    public int getCura() {
-        return cura;
+    public Habilidade animacao(TipoAnimacao animacao) {
+        this.animacao = animacao;
+        return this;
     }
 
-    public int getDanoDOT() {
-        return danoDOT;
+    public Habilidade categoria(CategoriaHabilidade categoria) {
+        this.categoria = categoria;
+        return this;
     }
 
-    public int getDuracaoDOT() {
-        return duracaoDOT;
+    public Habilidade pesoIA(int peso) {
+        this.pesoIA = peso;
+        return this;
     }
 
-    public int getRecargaAtual() {
-        return cooldownAtual;
+    public Habilidade ignorarSilencio() {
+        this.ignoraSilencio = true;
+        return this;
     }
 
-    public boolean estaDisponivel() {
-        return cooldownAtual == 0;
-    }
-    
-    public void setDescricao(String desc) {
-    	this.descricao = desc;
+    public Habilidade ignorarControle() {
+        this.ignoraControle = true;
+        return this;
     }
 
+    /* ================= CÓPIA ================= */
 
     public Habilidade copiar() {
         Habilidade copia = new Habilidade(
-            nome,
-            descricao,
-            CH,
-            cooldownInicial, // ✅ correto
-            cooldownMax
+                nome,
+                CH,
+                cooldownInicial,
+                cooldownMax,
+                personagem
         );
-        copia.cooldownAtual = cooldownInicial; // começa limpa
+
+        copia.cooldownAtual = cooldownInicial;
+        copia.prioridade = prioridade;
+        copia.ignoraSilencio = ignoraSilencio;
+        copia.ignoraControle = ignoraControle;
+        copia.alvo = alvo;
+        copia.animacao = animacao;
+        copia.categoria = categoria;
+        copia.pesoIA = pesoIA;
+
         efeitos.forEach(e -> copia.adicionarEfeito(e.copiar()));
+
         return copia;
     }
+    
+
+
+
+    public List<CaracteristicasHabilidade> getCaracteristicasHabilidade(){
+    	return CH;
+    }
+    
+    public boolean estaDisponivel() {
+        return cooldownAtual <= 0;
+    }
+
+
 
 }

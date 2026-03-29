@@ -30,7 +30,6 @@ public class Conta {
         
         this.desbloquearPersonagem(1);
         this.desbloquearPersonagem(4);
-        this.desbloquearPersonagem(2);
         
         
         this.moedas = 1000;
@@ -152,9 +151,9 @@ public class Conta {
         } else if (sorteio < comum + raro) {
             raridadeSorteada = Raridade.RARO;
         } else if (sorteio < comum + raro + epico) {
-            raridadeSorteada = Raridade.EPICO;
+            raridadeSorteada = Raridade.ÉPICO;
         } else {
-            raridadeSorteada = Raridade.LENDARIO;
+            raridadeSorteada = Raridade.LENDÁRIO;
         }
 
         // Filtra personagens dessa raridade
@@ -249,7 +248,7 @@ public class Conta {
 	public boolean gastarGemas(int val) {
 		if (this.getGemas() < val) return false;
 		
-		this.moedas -= val;
+		this.gemas -= val;
 		return true;
 	}
 	

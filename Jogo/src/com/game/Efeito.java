@@ -32,8 +32,27 @@ public class Efeito {
         NERF_SHIELD,
 
         BUFF_HEAL,
-        NERF_HEAL
+        NERF_HEAL,
+
+        BUFF_CRIT_CHANCE,
+        NERF_CRIT_CHANCE,
+        BUFF_CRIT_DAMAGE,
+        NERF_CRIT_DAMAGE,
+        STUN,
+        SILENCE,
+        ROOT,
+        TAUNT,
+
+        INVULNERABLE,
+        IMMUNITY,
+
+        REFLECT_DAMAGE,
+        LIFESTEAL,
+
+        
+        NEUTRO
     }
+
 
     
     public enum Categoria{
@@ -45,14 +64,25 @@ public class Efeito {
         DANO,
         REDUCAO_DANO,
         VELOCIDADE,
+        REDUCAO_VELOCIDADE,
         ATAQUE,
         DEFESA,
         PROTECAO,
         CURA,
+        AUMENTO_CURA,
         REDUCAO_CURA,
         CONTROLE,
         DOT,
-        HOT
+        HOT,
+        DILACERACAO,
+        CRITICO_CHANCE,
+        CRITICO_DANO,
+        CONTROLE_TOTAL,
+        CONTROLE_PARCIAL,
+        UTILIDADE,
+        REFLEXAO,
+        ROUBO_VIDA, STUN, SILENCIO, PROVOCADO,
+        NEUTRO
     }
 
 
@@ -115,9 +145,13 @@ public class Efeito {
     // =====================
     public void applyTick(Personagem alvo, Personagem atacante, List<Personagem> time1, List<Personagem> time2) {
         switch (kind) {
-            case DAMAGE_OVER_TIME -> alvo.danoDOT(valor, atacante, time1, time2);
-            case HEAL_OVER_TIME -> alvo.curar(valor);
-            default -> {}
+        case DAMAGE_OVER_TIME -> {
+            int valorFinal = calcularValorFinal(alvo);
+            alvo.danoDOT(valorFinal, atacante, time1, time2);
+        }
+
+        case HEAL_OVER_TIME -> alvo.curar(valor);
+        default -> {}
         }
     }
 
@@ -127,74 +161,177 @@ public class Efeito {
     public void applyImmediate(Personagem alvo) {
         if (applied) return;
 
+        int valorFinal = calcularValorFinal(alvo);
+
         switch (kind) {
-        
-        case BUFF_ATTACK -> {
-            valorAplicado = valor;
-            alvo.setMultiplicadorDano(
-                alvo.getMultiplicadorDano() + (valor / 100.0)
-            );
-        }
 
-        case NERF_ATTACK -> {
-            valorAplicado = valor;
-            alvo.setMultiplicadorDano(
-                alvo.getMultiplicadorDano() - ((valor / 100.0) /*/ alvo.getResisRecucaoDano()*/)
-            );
-        }
-
-        case BUFF_HEAL -> {
-            valorAplicado = valor;
-            alvo.setMultiplicadorCura(
-                alvo.getMultiplicadorCura() + (valor / 100.0)
-            );
-        }
-
-        case NERF_HEAL -> {
-            valorAplicado = valor;
-            alvo.setMultiplicadorCura(
-                alvo.getMultiplicadorCura() - (valor / 100.0)
-            );
-        }
-
-        case BUFF_SHIELD -> {
-            valorAplicado = valor;
-            alvo.ganharProtecao(valorAplicado);
-        }
-
-        case NERF_SHIELD -> {
-            valorAplicado = Math.min(valor, alvo.getProtecao());
-            alvo.perderProtecao(valorAplicado);
-        }
-
- 
-            case BUFF_DEFENSE, NERF_DEFENSE -> {
-                valorAplicado = valor;
+            case BUFF_ATTACK -> {
+                valorAplicado = valorFinal;
+                alvo.setMultiplicadorDano(
+                    alvo.getMultiplicadorDano() + (valorAplicado / 100.0)
+                );
             }
 
-            case BUFF_SPEED, NERF_SPEED -> {
-                valorAplicado = valor;
+            case NERF_ATTACK -> {
+                valorAplicado = valorFinal;
+                alvo.setMultiplicadorDano(
+                    alvo.getMultiplicadorDano() - (valorFinal / 100.0)
+                );
             }
+
+            case BUFF_DEFENSE -> {
+                valorAplicado = valorFinal;
+                alvo.setMultiplicadorDefesa(
+                    alvo.getMultiplicadorDefesa() + (valorFinal / 100.0)
+                );
+            }
+
+            case NERF_DEFENSE -> {
+                valorAplicado = valorFinal;
+                alvo.setMultiplicadorDefesa(
+                    alvo.getMultiplicadorDefesa() - (valorFinal / 100.0)
+                );
+            }
+
+            case BUFF_SPEED -> {
+                valorAplicado = valorFinal;
+                alvo.setMultiplicadorVelocidade(
+                    alvo.getMultiplicadorVelocidade() + (valorFinal / 100.0)
+                );
+            }
+
+            case NERF_SPEED -> {
+                valorAplicado = valorFinal;
+                alvo.setMultiplicadorVelocidade(
+                    alvo.getMultiplicadorVelocidade() - (valorFinal / 100.0)
+                );
+            }
+
+            case BUFF_HEAL -> {
+                valorAplicado = valorFinal;
+                alvo.setMultiplicadorCura(
+                    alvo.getMultiplicadorCura() + (valorFinal / 100.0)
+                );
+            }
+
+            case NERF_HEAL -> {
+                valorAplicado = valorFinal;
+                alvo.setMultiplicadorCura(
+                    alvo.getMultiplicadorCura() - (valorFinal / 100.0)
+                );
+            }
+
+            case BUFF_SHIELD -> {
+                valorAplicado = valorFinal;
+                alvo.ganharProtecao(valorAplicado);
+            }
+
+            case NERF_SHIELD -> {
+                valorAplicado = Math.min(valorFinal, alvo.getProtecao());
+                alvo.perderProtecao(valorAplicado);
+            }
+            case BUFF_CRIT_CHANCE -> {
+                valorAplicado = valorFinal;
+                alvo.setChanceCritico(
+                    alvo.getChanceCritico() + valorFinal
+                );
+            }
+
+            case NERF_CRIT_CHANCE -> {
+                valorAplicado = valorFinal;
+                alvo.setChanceCritico(
+                    alvo.getChanceCritico() - valorFinal
+                );
+            }
+
+            case BUFF_CRIT_DAMAGE -> {
+                valorAplicado = valorFinal;
+                alvo.setMultiplicadorCritico(
+                    alvo.getMultiplicadorCritico() + (valorFinal / 100.0)
+                );
+            }
+
+            case NERF_CRIT_DAMAGE -> {
+                valorAplicado = valorFinal;
+                alvo.setMultiplicadorCritico(
+                    alvo.getMultiplicadorCritico() - (valorFinal / 100.0)
+                );
+            }
+            case REFLECT_DAMAGE -> {
+                valorAplicado = valorFinal;
+                alvo.setRefletirDano(valorAplicado);
+            }
+
+            case LIFESTEAL -> {
+                valorAplicado = valorFinal;
+                alvo.setRouboDeVida(valorAplicado);
+            }
+
+            case INVULNERABLE -> alvo.setInvulneravel(true);
+
+            case IMMUNITY -> alvo.setImune(true);
             
+            case STUN -> alvo.setStun(true);
+
+            case SILENCE -> alvo.setSilenciado(true);
+
+            case ROOT -> alvo.setEnraizado(true);
+
+            case TAUNT -> alvo.setProvocado(true);
+
+
             default -> {}
         }
+
         applied = true;
     }
+
+    public int calcularValorFinal(Personagem alvo) {
+
+        double valor = this.valor;
+
+        switch (this.tag) {
+
+            case REDUCAO_DANO:
+                valor *= (1 - alvo.getResisRecucaoDano());
+                break;
+
+            case REDUCAO_VELOCIDADE:
+                valor *= (1 - alvo.getResisReducaoVelocidade());
+                break;
+
+            case REDUCAO_CURA:
+                valor *= (1 - alvo.getResisReducaoCura());
+                break;
+
+            case DOT:
+                valor *= (1 - alvo.getResisDOT());
+                break;
+
+            case DILACERACAO:
+                valor *= (1 - alvo.getResisDilaceracao());
+                break;
+        }
+
+        return (int) valor;
+    }
+
     
     public Categoria getCategoria() {
         return switch (kind) {
 
-            case BUFF_ATTACK,
-                 BUFF_DEFENSE,
-                 BUFF_SPEED,
-                 BUFF_SHIELD -> Categoria.BUFF;
+            case BUFF_ATTACK, BUFF_DEFENSE, BUFF_SPEED,
+                 BUFF_CRIT_CHANCE, BUFF_CRIT_DAMAGE,
+                 BUFF_HEAL, BUFF_SHIELD,
+                 INVULNERABLE, IMMUNITY,
+                 LIFESTEAL, REFLECT_DAMAGE -> Categoria.BUFF;
 
-            case NERF_ATTACK,
-                 NERF_DEFENSE,
-                 NERF_SPEED,
-                 NERF_SHIELD -> Categoria.NERF;
+            case NERF_ATTACK, NERF_DEFENSE, NERF_SPEED,
+                 NERF_CRIT_CHANCE, NERF_CRIT_DAMAGE,
+                 DAMAGE_OVER_TIME,
+                 STUN, SILENCE, ROOT, TAUNT -> Categoria.NERF;
 
-            default -> Categoria.NEUTRO; // DOT / HOT
+            default -> Categoria.NEUTRO;
         };
     }
 
@@ -214,6 +351,26 @@ public class Efeito {
                     alvo.getMultiplicadorDano() + (valorAplicado / 100.0)
                 );
 
+            case BUFF_DEFENSE ->
+                alvo.setMultiplicadorDefesa(
+                    alvo.getMultiplicadorDefesa() - (valorAplicado / 100.0)
+                );
+
+            case NERF_DEFENSE ->
+                alvo.setMultiplicadorDefesa(
+                    alvo.getMultiplicadorDefesa() + (valorAplicado / 100.0)
+                );
+
+            case BUFF_SPEED ->
+                alvo.setMultiplicadorVelocidade(
+                    alvo.getMultiplicadorVelocidade() - (valorAplicado / 100.0)
+                );
+
+            case NERF_SPEED ->
+                alvo.setMultiplicadorVelocidade(
+                    alvo.getMultiplicadorVelocidade() + (valorAplicado / 100.0)
+                );
+
             case BUFF_HEAL ->
                 alvo.setMultiplicadorCura(
                     alvo.getMultiplicadorCura() - (valorAplicado / 100.0)
@@ -223,15 +380,45 @@ public class Efeito {
                 alvo.setMultiplicadorCura(
                     alvo.getMultiplicadorCura() + (valorAplicado / 100.0)
                 );
+            case BUFF_CRIT_CHANCE ->
+            alvo.setChanceCritico(
+                alvo.getChanceCritico() - valorAplicado
+            );
+
+           case NERF_CRIT_CHANCE ->
+               alvo.setChanceCritico(
+                    alvo.getChanceCritico() + valorAplicado
+            );
+
+        case BUFF_CRIT_DAMAGE ->
+            alvo.setMultiplicadorCritico(
+                alvo.getMultiplicadorCritico() - (valorAplicado / 100.0)
+            );
+
+        case NERF_CRIT_DAMAGE ->
+            alvo.setMultiplicadorCritico(
+                alvo.getMultiplicadorCritico() + (valorAplicado / 100.0)
+            );
+
 
             case BUFF_SHIELD -> alvo.perderProtecao(valorAplicado);
             case NERF_SHIELD -> alvo.ganharProtecao(valorAplicado);
-
+            
+            case STUN -> alvo.setStun(false);
+            case SILENCE -> alvo.setSilenciado(false);
+            case ROOT -> alvo.setEnraizado(false);
+            case TAUNT -> alvo.setProvocado(false);
+            case REFLECT_DAMAGE -> alvo.setRefletirDano(0);
+            case LIFESTEAL -> alvo.setRouboDeVida(0);
+            case INVULNERABLE -> alvo.setInvulneravel(false);
+            case IMMUNITY -> alvo.setImune(false);
+            
             default -> {}
         }
 
         applied = false;
     }
+
 
 
     public void anular(Personagem alvo) {

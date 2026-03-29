@@ -24,24 +24,28 @@ public class Dragao extends Personagem {
 		            1,
 		            Tipo.FOGO,
 		            Classe.TANQUE,
-		            Raridade.LENDARIO,
-		            "Causa dano em área e aplica queimadura",
+		            Raridade.LENDÁRIO,
+		            "Uma lendária criatura conhecida por suas escamas resistentes e a capacidade de assoprar chamas.",
 		            new StatusBase(
 		                3000, // vidaMaxima
 		                3000,  // vida
-		                500,  // ataque
-		                30,   // defesa %
+		                600,  // ataque
+		                25,   // defesa %
 		                80,   // velocidade
 		                0,   // proteção
 		                25,   // chance de crítico
 		                1.25   // dano crítico
 		            )
 		        );
-			habilidades[0] = new Habilidade("Rasgo Protetor", descricaoHabilidade1(), Arrays.asList(CaracteristicasHabilidade.DANO), 0, 0);
-		    habilidades[1] = new Habilidade("Escamas Protetoras", descricaoHabilidade2(), Arrays.asList(CaracteristicasHabilidade.DEFESA), 1, 3); // começa em CD
-		    habilidades[2] = new Habilidade("Sopro Flamejante", descricaoHabilidade3(), Arrays.asList(CaracteristicasHabilidade.DANO_ALTO, CaracteristicasHabilidade.DOT_ALTO), 5, 7);
-		    habilidades[3] = new Habilidade("Rugido Aterrorizante", descricaoHabilidade4(), Arrays.asList(CaracteristicasHabilidade.AUMENTO_DE_ATAQUE), 2, 3); // começa em CD
+			habilidades[0] = new Habilidade("Presença draconica", Arrays.asList(CaracteristicasHabilidade.PROTECAO,CaracteristicasHabilidade.REDUCAO_DE_VELOCIDADE), 0, 0, this);
+		    habilidades[1] = new Habilidade("Escamas Protetoras", Arrays.asList(CaracteristicasHabilidade.DEFESA, CaracteristicasHabilidade.AUMENTO_DE_ATAQUE), 1, 3, this); // começa em CD
+		    habilidades[2] = new Habilidade("Sopro Flamejante", Arrays.asList(CaracteristicasHabilidade.DANO_LETAL, CaracteristicasHabilidade.DOT_ALTO, CaracteristicasHabilidade.DANO_EM_AREA), 7, 5, this);
+		    habilidades[3] = new Habilidade("Rugido Aterrorizante", Arrays.asList(CaracteristicasHabilidade.DANO_MEDIANO, CaracteristicasHabilidade.MENOS_DEFESA), 1, 3, this); // começa em CD
 		    
+		    setResisDilaceracao(0.5);
+		    setResisDOT(0.5);
+		    
+
 	}
 		
 
@@ -80,7 +84,8 @@ public class Dragao extends Personagem {
 
 		@Override
 		protected void aoSerAtacado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
-			// TODO Auto-generated method stub
+			this.aplicarEfeito(ListaEfeitos.aumentoDefesa("Aumento de Defesa", 5, 3), this);
+			adversario.aplicarEfeito(ListaEfeitos.reducaoCura("Reução de Cura", 25, 2), this);
 			
 		}
 
@@ -135,7 +140,7 @@ public class Dragao extends Personagem {
 		@Override
 		protected String descricaoPassivas() {
 			// TODO Auto-generated method stub
-			return "Sem passivas disponíveis!";
+			return "Ao sofrer um ataque, o Dragão recebe um aumento de 5% na defesa por 3 turnos e o adversário tem sua cura reduzida em 25% por 2 turnos!";
 		}
 
 
@@ -144,11 +149,8 @@ public class Dragao extends Personagem {
 		@Override
 		protected boolean Habilidade1(Habilidade habilidade1, Personagem alvo, Personagem atacante,
 				List<Personagem> time1, List<Personagem> time2) {
-			System.out.println(this.getNome() + " usa Rasgo em " + alvo.getNome() + "!");
-			int danoInicial = this.getAtaqueFinal(); // Dano base da investida
-			alvo.receberDano(danoInicial, this, time1, time2);
-			System.out.println(alvo.getNome() + " recebe " + danoInicial +
-			        " de dano!");
+			alvo.aplicarEfeito(ListaEfeitos.danoProlongado("Queimaduras", (int)(this.getAtaqueFinal() / 3), 4), atacante);
+			alvo.aplicarEfeito(ListaEfeitos.desaceleracao("Desaceleração", 25, 2), atacante);
 			return true;
 		}
 
@@ -158,9 +160,8 @@ public class Dragao extends Personagem {
 		@Override
 		protected boolean Habilidade2(Habilidade habilidade2, Personagem alvo, Personagem atacante,
 				List<Personagem> time1, List<Personagem> time2) {
-			System.out.println(this.getNome() + " usa Escamas Protetoras!");
-			this.aplicarEfeito(ListaEfeitos.aumentoDefesa(50, 3)); // +75 defesa por 2 turnos
-			System.out.println(this.getNome() + " recebe um aumento de defesa de 50% por 3 turnos!");
+			this.aplicarEfeito(ListaEfeitos.aumentoDefesa("Aumento de Defesa", 25, 3), this); // +25% defesa por 3 turnos
+			this.aplicarEfeito(ListaEfeitos.aumentoAtaque("Aumento de Ataque", 25, 3), this); // +25% ataque por 3 turnos
 			return true;
 		}
 
@@ -170,16 +171,13 @@ public class Dragao extends Personagem {
 		@Override
 		protected boolean Habilidade3(Habilidade habilidade3, Personagem alvo, Personagem atacante,
 				List<Personagem> time1, List<Personagem> time2) {
-			System.out.println(this.getNome() + " usa Sopro Flamejante!");
-			int dano = (int) (this.getAtaqueFinal() * 3); // Dano base da investida
-			int danoQueimadura = (int) (dano/2);
+			int dano = (int) (this.getAtaqueFinal() * 2); // Dano base da investida
+			int danoQueimadura = (int) (this.getAtaqueFinal());
 			int val = time2.size();
 			for(int i = 0; i < val; i++) {
-				System.out.println(time2.get(i).getNome() + " Vida: " + time2.get(i).getVida());
 				time2.get(i).receberDano(dano, this, time1, time2);
-				time2.get(i).aplicarEfeito(ListaEfeitos.danoProlongado("Queimaduras", danoQueimadura, 2));
-				System.out.println("/" + time2.get(i).getVida());
-				System.out.println(time2.get(i).getNome() + " sofre "+ dano + " de dano e queimadura ("+ danoQueimadura + "/turno).");
+				time2.get(i).aplicarEfeito(ListaEfeitos.danoProlongado("Queimaduras", danoQueimadura, 3), this);
+
 			}			return true;
 		}
 
@@ -189,12 +187,9 @@ public class Dragao extends Personagem {
 		@Override
 		protected boolean Habilidade4(Habilidade habilidade4, Personagem alvo, Personagem atacante,
 				List<Personagem> time1, List<Personagem> time2) {
-			System.out.println(this.getNome() + " usa Rugido Aterrorizante!");
-			int aumentoAtaque = (int) (this.getAtaqueFinal() * 0.5);
-			this.aplicarEfeito(ListaEfeitos.aumentoAtaque(50, 2)); // +50% ataque por 2 turnos
-
-			System.out.println(this.getNome() + " tem seu ataque aumentado em "
-			        + aumentoAtaque + " pontos!");
+			int dano = (int) (this.getAtaqueFinal() *1.5);
+			alvo.receberDano(dano, atacante, time1, time2);
+			alvo.aplicarEfeito(ListaEfeitos.reducaoDefesa("Redução de Defesa", 25, 3), atacante);
 			return true;
 		}
 
@@ -202,28 +197,28 @@ public class Dragao extends Personagem {
 		@Override
 		protected String descricaoHabilidade1() {
 			// TODO Auto-generated method stub
-			return "Causa " + this.getAtaqueFinal() + " dano ao seu adversário.";
+			return "O adversário perde 25% da velocidade por 2 turnos e recebe Queimaduras(sofre " + (int)(this.getAtaqueFinal() / 3) + " de dano por 4 turnos)!";
 		}
 
 
 		@Override
 		protected String descricaoHabilidade2() {
 			// TODO Auto-generated method stub
-			return "Aumenta a defesa do Dragão Ancião em 50% por 3 turnos.";
+			return "Aumenta a defesa e o dano do Dragão Ancião em 25% por 3 turnos.";
 		}
 
 
 		@Override
 		protected String descricaoHabilidade3() {
 			// TODO Auto-generated method stub
-			return "Um ataque poderoso que causa " + (int)(this.getAtaqueFinal() * 3) + " de dano ao time inimigo e os deixa em chamas ( causa "+ (int) (this.getAtaqueFinal() * 1.5) + " de dano por 2 turnos).";
+			return "Um ataque poderoso que causa " + (int)(this.getAtaqueFinal() * 2) + " de dano ao time inimigo e causa Queimaduras(sofre "+ (int) (this.getAtaqueFinal()) + " de dano por 3 turnos).";
 		}
 
 
 		@Override
 		protected String descricaoHabilidade4() {
 			// TODO Auto-generated method stub
-			return "Aumenta o ataque em 50% por 2 turnos.";
+			return "Causa " + (int)(this.getAtaqueFinal() * 1.5) + " de dano e reduz a defesa do adversário em 25% por 3 turnos.";
 		}
 
 		

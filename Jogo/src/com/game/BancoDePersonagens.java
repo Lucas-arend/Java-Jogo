@@ -17,6 +17,8 @@ public class BancoDePersonagens {
 		personagensDisponiveis.add(new Ciclope(5L));
 		personagensDisponiveis.add(new Zumbi(6L));
 		personagensDisponiveis.add(new Golem_De_Pedra(7L));
+		personagensDisponiveis.add(new Mago_Das_Ilusões(8L));
+		personagensDisponiveis.add(new Mago_Eletrico(9L));
 		// Adicione mais personagens conforme necessário
 	}
 

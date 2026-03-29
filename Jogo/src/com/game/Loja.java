@@ -15,14 +15,15 @@ public class Loja {
 
     public static ItemLoja[] listarBaus() {
         return new ItemLoja[] {
-            new ItemLoja("bau comum", TipoLoja.BAU, TipoValor.MOEDA, 250),
+            new ItemLoja("bau comum", TipoLoja.BAU, TipoValor.MOEDA, 200),
+            new ItemLoja("bau épico", TipoLoja.BAU, TipoValor.MOEDA, 5000),
             new ItemLoja("bau lendário", TipoLoja.BAU, TipoValor.GEMA, 500)
         };
     }
 
     public static ItemLoja[] listarOfertas() {
         return new ItemLoja[] {
-            new ItemLoja("Oferta Inicial", TipoLoja.OFERTA, TipoValor.MOEDA, 100)
+        		new ItemLoja("1000 moedas", TipoLoja.OFERTA, TipoValor.GEMA, 60),
         };
     }
 
@@ -33,7 +34,7 @@ public class Loja {
         		else System.out.println("Moedas insuficientes!");
         	}
         	else if(item.tipoVal == TipoValor.GEMA) {
-        		if (conta.gastarGemas(item.valor) == true) comprarBau(conta, item.nome);
+        		if (conta.gastarGemas(item.valor)) comprarBau(conta, item.nome);
         		else System.out.println("Gemas insuficientes!");
         	}
             
@@ -43,7 +44,7 @@ public class Loja {
         		else System.out.println("Moedas insuficientes!");
         	}
         	else if(item.tipoVal == TipoValor.GEMA) {
-        		if (conta.gastarGemas(item.valor) == true) comprarOferta(conta, item.nome);
+        		if (conta.gastarGemas(item.valor)) comprarOferta(conta, item.nome);
         		else System.out.println("Gemas insuficientes!");
         	}
             
@@ -55,10 +56,14 @@ public class Loja {
         	JOptionPane.showMessageDialog(null, conta.desbloquearPersonagemAleatorio(7490, 2000, 500, 10));
         } else if ("bau lendário".equals(nome)) {
         	JOptionPane.showMessageDialog(null, conta.desbloquearPersonagemAleatorio(0, 0, 0, 100));
+        } else if ("bau épico".equals(nome)) {
+        	JOptionPane.showMessageDialog(null, conta.desbloquearPersonagemAleatorio(0, 0, 100, 0));
         }
     }
 
     private static void comprarOferta(Conta conta, String nome) {
-        // futuras ofertas
+        if ("1000 moedas".equals(nome)) {
+        	conta.ganharMoedas(1000);
+        }
     }
 }

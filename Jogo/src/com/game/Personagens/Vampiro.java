@@ -35,10 +35,10 @@ public class Vampiro extends Personagem {
                 1.50   // dano crítico
 			)
 		);
-		habilidades[0] = new Habilidade("Mordida Sanguinária", descricaoHabilidade1(), Arrays.asList(CaracteristicasHabilidade.DANO, CaracteristicasHabilidade.CURA), 0, 0);
-		habilidades[1] = new Habilidade("Neblina Sombria", descricaoHabilidade2(), Arrays.asList(CaracteristicasHabilidade.AUMENTO_DE_VIDA_MAXIMA, CaracteristicasHabilidade.CURA_ALTA), 3, 4); // começa em CD
-		habilidades[2] = new Habilidade("Garras Vorazes", descricaoHabilidade3(), Arrays.asList(CaracteristicasHabilidade.DANO_CONSIDERAVEL, CaracteristicasHabilidade.MENOS_DEFESA), 2, 2);
-		habilidades[3] = new Habilidade("Chama da Noite", descricaoHabilidade4(), Arrays.asList(CaracteristicasHabilidade.DOT), 0, 1); // começa em CD
+		habilidades[0] = new Habilidade("Mordida Sanguinária", Arrays.asList(CaracteristicasHabilidade.DANO, CaracteristicasHabilidade.CURA), 0, 0, this);
+		habilidades[1] = new Habilidade("Neblina Sombria", Arrays.asList(CaracteristicasHabilidade.AUMENTO_DE_VIDA_MAXIMA, CaracteristicasHabilidade.CURA_ALTA), 3, 4, this); // começa em CD
+		habilidades[2] = new Habilidade("Garras Vorazes", Arrays.asList(CaracteristicasHabilidade.DANO_CONSIDERAVEL, CaracteristicasHabilidade.MENOS_DEFESA), 2, 2, this);
+		habilidades[3] = new Habilidade("Chama da Noite", Arrays.asList(CaracteristicasHabilidade.DOT), 0, 1, this); // começa em CD
 	}
 
 	@Override
@@ -147,7 +147,7 @@ public class Vampiro extends Personagem {
 		int danoInicial = (int) (this.getAtaqueFinal() * 1.5); // Dano base do ataque
 		alvo.receberDano(danoInicial, this, time1, time2);
 		// Reduz a defesa do alvo
-		alvo.aplicarEfeito(ListaEfeitos.reducaoDefesa(50, 3).copiar());
+		alvo.aplicarEfeito(ListaEfeitos.reducaoDefesa("Redução de Defesa", 50, 3).copiar(), this);
 		System.out.println(alvo.getNome() + " recebe " + danoInicial +
 		        " de dano e tem sua defesa reduzida!");
 		return true;
@@ -159,7 +159,7 @@ public class Vampiro extends Personagem {
 		System.out.println(this.getNome() + " usa Chama da Noite em " + alvo.getNome() + "!");
 		// Aplica efeito de dano contínuo
 		int dano = (int) (this.getAtaqueFinal() / 3);
-		alvo.aplicarEfeito(ListaEfeitos.danoProlongado("Chama da Noite", dano, 5).copiar());
+		alvo.aplicarEfeito(ListaEfeitos.danoProlongado("Chama da Noite", dano, 5).copiar(), this);
 		System.out.println(alvo.getNome() + " sofrerá " + dano + "por 5 turnos!");
 		return true;
 	}

@@ -28,7 +28,7 @@ public class Raptor extends Personagem {
 	            new StatusBase(
 	                1200, // vidaMaxima
 	                1200,  // vida
-	                800,  // ataque
+	                700,  // ataque
 	                0,   // defesa %
 	                150,   // velocidade
 	                0,   // proteção
@@ -36,10 +36,12 @@ public class Raptor extends Personagem {
 	                1.25   // dano crítico
 	            )
 	        );
-		habilidades[0] = new Habilidade("Ataque Furtivo", descricaoHabilidade1(), Arrays.asList(CaracteristicasHabilidade.DANO), 0, 0);
-	    habilidades[1] = new Habilidade("Investida Rápida", descricaoHabilidade2(), Arrays.asList(CaracteristicasHabilidade.AUMENTO_DE_VELOCIDADE, CaracteristicasHabilidade.PROTECAO), 1, 3); // começa em CD
-	    habilidades[2] = new Habilidade("Garras Cortantes", descricaoHabilidade3(), Arrays.asList(CaracteristicasHabilidade.DANO_ALTO), 2, 2);
-	    habilidades[3] = new Habilidade("Rugido Intimidante", descricaoHabilidade4(), Arrays.asList(CaracteristicasHabilidade.REDUCAO_DE_ATAQUE), 2, 2); // começa em CD
+		habilidades[0] = new Habilidade("Ataque Furtivo", Arrays.asList(CaracteristicasHabilidade.DANO), 0, 0, this);
+	    habilidades[1] = new Habilidade("Investida Rápida", Arrays.asList(CaracteristicasHabilidade.AUMENTO_DE_VELOCIDADE, CaracteristicasHabilidade.PROTECAO), 1, 3, this); // começa em CD
+	    habilidades[2] = new Habilidade("Garras Cortantes", Arrays.asList(CaracteristicasHabilidade.DANO_ALTO), 2, 2, this);
+	    habilidades[3] = new Habilidade("Rugido Intimidante", Arrays.asList(CaracteristicasHabilidade.REDUCAO_DE_ATAQUE), 2, 2, this); // começa em CD
+	    
+	    setResisReducaoDano(1);
     }
     
     
@@ -123,9 +125,8 @@ public class Raptor extends Personagem {
 	@Override
 	protected boolean Habilidade1(Habilidade habilidade1, Personagem alvo, Personagem atacante, List<Personagem> time1,
 			List<Personagem> time2) {
-		System.out.println(this.getNome() + " usa "+ this.getHabilidadeNome1() +" em " + alvo.getNome() + "!");
         alvo.receberDano(this.getAtaqueFinal(), this, time1, time2);
-        System.out.println(alvo.getNome() + " recebe " + this.getAtaqueFinal() + " de dano!");
+        alvo.aplicarEfeito(ListaEfeitos.reducaoAtaque("Redução de Dano", 25, 2), this);
         return true;
 	}
 
@@ -134,9 +135,9 @@ public class Raptor extends Personagem {
 	protected boolean Habilidade2(Habilidade habilidade2, Personagem alvo, Personagem atacante, List<Personagem> time1,
 			List<Personagem> time2) {
 		System.out.println(this.getNome() + " usa Investida Rápida!");
-        this.aplicarEfeito(ListaEfeitos.aumentoVelocidade(30, 2));
+        this.aplicarEfeito(ListaEfeitos.aumentoVelocidade("Aumento de Velocidade", 30, 2), this);
         int protecao = (int) (this.getAtaqueFinal() * 1.5);
-        this.aplicarEfeito(ListaEfeitos.protecao(protecao, 2)); // escudo temporário
+        this.aplicarEfeito(ListaEfeitos.protecao("Absorção", protecao, 2), this); // escudo temporário
         System.out.println(this.getNome() + " aumenta sua velocidade em 30 pontos por 2 turnos e ganha um escudo temporário de " + protecao + "!");
         return true;
 	}
@@ -157,7 +158,7 @@ public class Raptor extends Personagem {
 			List<Personagem> time2) {
 		System.out.println(this.getNome() + " usa Rugido Intimidante!");
         int reducaoAtaque = (int) (alvo.getAtaqueFinal());// reduz 100% do ataque
-        alvo.aplicarEfeito(ListaEfeitos.reducaoAtaque(reducaoAtaque, 1));
+        alvo.aplicarEfeito(ListaEfeitos.reducaoAtaque("Redução de Dano", reducaoAtaque, 1), this);
         System.out.println(alvo.getNome() + " tem seu ataque reduzido em " + reducaoAtaque + " pontos por 1 turno!");	
         return true;
 	}
@@ -166,7 +167,7 @@ public class Raptor extends Personagem {
 	@Override
 	protected String descricaoHabilidade1() {
 		// TODO Auto-generated method stub
-		return "Um ataque rápido que causa " + this.getAtaqueFinal() + " de dano ao alvo.";
+		return "Um ataque rápido que causa " + this.getAtaqueFinal() + " de dano ao alvo e reduz o seu dano em 25% por 2 turnos.";
 	}
 
 

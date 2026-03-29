@@ -4,6 +4,11 @@ import java.util.*;
 import com.game.Efeito.TagEfeito;
 
 public abstract class Personagem {
+	private CombatListener listener;
+
+	public void setCombatListener(CombatListener listener){
+	    this.listener = listener;
+	}
 	
 	@SuppressWarnings("unused")
 	private String caminhoImagem;
@@ -40,21 +45,38 @@ public abstract class Personagem {
 	
 	private double multiplicadorDano = 1;
 	private double multiplicadorCura = 1;
+	double multiplicadorDefesa = 1.0;
+	double multiplicadorVelocidade = 1.0;
 	
 	//--RESISTÊNCIAS--//
-	private double resisReducaoDano = 0;
-	private double resisReducaoVelocidade = 0;
-	private double resisReducaoDanoCritico = 0;
-	private double resisReducaoChanceCritico = 0;
-	private double resisReducaoCura = 0;
-	private double resisDOT = 0;
-	private double resisDilaceracao = 0;
+	double resisReducaoDano = 0;
+	double resisReducaoVelocidade = 0;
+	double resisReducaoDanoCritico = 0;
+	double resisReducaoChanceCritico = 0;
+	double resisReducaoCura = 0;
+	double resisDOT = 0;
+	double resisDilaceracao = 0;
+
+	private boolean stun;
+	private boolean silenciado;
+	private boolean enraizado;
+	private boolean provocado;
+	private boolean invulneravel;
+	private boolean imune;
+
+	private int refletirDano;
+	private int rouboDeVida;
+	
+	
+	
+	
+
 
 
 	
 	// Lista de efeitos ativos no personagem
 	private List<Efeito> efeitosAtivos = new ArrayList<>();
-	protected Habilidade[] habilidades = new Habilidade[4];
+	public Habilidade[] habilidades = new Habilidade[4];
 
 
 	//Construtor
@@ -84,6 +106,8 @@ public abstract class Personagem {
 	    this.protecaoInicial = statusBase.protecao;
 	    this.chanceCritico = statusBase.chanceCritico;
 	    this.danoCritico = statusBase.danoCritico;
+	    
+	    
 	    
 	    if(this.nivel > 1) {
 	    	this.nivel = nivel;
@@ -131,21 +155,24 @@ public abstract class Personagem {
 	public int getDefesaInicial() {return defesaInicial;}
 	public int getVelocidadeInicial() {return velocidadeInicial;}
 	public int getProtecaoInicial() {return protecaoInicial;}
-    public int getValorDano(Habilidade h) {return h.getDano();}
-    public int getValorCura(Habilidade h) {return h.getCura();}
-    public int getDanoDOTPorTurno(Habilidade h) {return h.getDanoDOT();}
+    //public int getValorDano(Habilidade h) {return h.getDano();}
+    //public int getValorCura(Habilidade h) {return h.getCura();}
+    //public int getDanoDOTPorTurno(Habilidade h) {return h.getDanoDOT();}
     public double getPorcentagemVida() {return (double) vida / vidaMaxima;}
     public double getMultiplicadorDano() {return multiplicadorDano;}
     public double getMultiplicadorCura() {return multiplicadorCura;}
+    public double getMultiplicadorDefesa() { return multiplicadorDefesa; }
+    public double getMultiplicadorVelocidade() { return multiplicadorVelocidade; }
+	public int getChanceCritico() { return chanceCritico; }
+    public double getMultiplicadorCritico() { return danoCritico; }
+	
+
 	public boolean isVivo() {return vivo;}
 	public String getHabilidadeNome1() {return habilidades[0].getNome();}
 	public String getHabilidadeNome2() {return habilidades[1].getNome();}
 	public String getHabilidadeNome3() {return habilidades[2].getNome();}
 	public String getHabilidadeNome4() {return habilidades[3].getNome();}
-	public String getHabilidadeDescricao1() {return habilidades[0].getDescricao();}
-	public String getHabilidadeDescricao2() {return habilidades[1].getDescricao();}
-	public String getHabilidadeDescricao3() {return habilidades[2].getDescricao();}
-	public String getHabilidadeDescricao4() {return habilidades[3].getDescricao();}
+
 	public List<Efeito> getEfeitosAtivos() { return new ArrayList<>(efeitosAtivos); }
 	
 	//--gets Resistências--//
@@ -179,10 +206,108 @@ public abstract class Personagem {
 	public void setVelocidade(int velocidade) {this.velocidade = velocidade;}
 	public void setProtecao(int protecao) {this.protecao = protecao;}
 	public void setVidaMaxima(int vidaMaxima) {this.vidaMaxima = vidaMaxima;}
-	public void setMultiplicadorDano(double MD) {this.multiplicadorDano = MD;}
+	public void setMultiplicadorDano(double valor) {this.multiplicadorDano = Math.max(0, valor);}
 	public void setMultiplicadorCura(double MC) {this.multiplicadorCura = MC;}
+    public void setMultiplicadorVelocidade(double v) { multiplicadorVelocidade = v; }
+    public void setMultiplicadorDefesa(double v) { multiplicadorDefesa = v; }
+    public void setMultiplicadorCritico(double v) { danoCritico = Math.max(0, v); }
+	public void setChanceCritico(int v) { chanceCritico = Math.max(0, v); }
 	public void setVivo(boolean vivo) {this.vivo = vivo;}  
 	
+	
+	public void setResisReducaoDano(double resisReducaoDano) {
+	    this.resisReducaoDano = resisReducaoDano;
+	}
+
+	public void setResisReducaoVelocidade(double resisReducaoVelocidade) {
+	    this.resisReducaoVelocidade = resisReducaoVelocidade;
+	}
+
+	public void setResisReducaoDanoCritico(double resisReducaoDanoCritico) {
+	    this.resisReducaoDanoCritico = resisReducaoDanoCritico;
+	}
+
+	public void setResisReducaoChanceCritico(double resisReducaoChanceCritico) {
+	    this.resisReducaoChanceCritico = resisReducaoChanceCritico;
+	}
+
+	public void setResisReducaoCura(double resisReducaoCura) {
+	    this.resisReducaoCura = resisReducaoCura;
+	}
+
+	public void setResisDOT(double resisDOT) {
+	    this.resisDOT = resisDOT;
+	}
+
+	public void setResisDilaceracao(double resisDilaceracao) {
+	    this.resisDilaceracao = resisDilaceracao;
+	}
+	
+
+	public boolean isStun() {
+		return stun;
+	}
+
+	public void setStun(boolean stun) {
+		this.stun = stun;
+	}
+
+	public boolean isSilenciado() {
+		return silenciado;
+	}
+
+	public void setSilenciado(boolean silenciado) {
+		this.silenciado = silenciado;
+	}
+
+	public boolean isEnraizado() {
+		return enraizado;
+	}
+
+	public void setEnraizado(boolean enraizado) {
+		this.enraizado = enraizado;
+	}
+
+	public boolean isProvocado() {
+		return provocado;
+	}
+
+	public void setProvocado(boolean provocado) {
+		this.provocado = provocado;
+	}
+
+	public boolean isInvulneravel() {
+		return invulneravel;
+	}
+
+	public void setInvulneravel(boolean invulneravel) {
+		this.invulneravel = invulneravel;
+	}
+
+	public boolean isImune() {
+		return imune;
+	}
+
+	public void setImune(boolean imune) {
+		this.imune = imune;
+	}
+
+	public int getRefletirDano() {
+		return refletirDano;
+	}
+
+	public void setRefletirDano(int refletirDano) {
+		this.refletirDano = refletirDano;
+	}
+
+	public int getRouboDeVida() {
+		return rouboDeVida;
+	}
+
+	public void setRouboDeVida(int rouboDeVida) {
+		this.rouboDeVida = rouboDeVida;
+	}
+
 	//Gerenciamento
 	public int ganharExperiencia(int exp) {
 	    this.experiencia += exp;
@@ -215,21 +340,6 @@ public abstract class Personagem {
 	//Gerenciamento dos Status pelo nível (para ser mais fácil de balancear)
 	public void StatusNivel() {
 		resetarStatus();
-		if (this.nivel < 1) {
-			for(int i = 0; i <= this.nivel; i++) {
-				this.ataque += (int) (statusBase.ataque * 1.1);
-		        this.vidaMaxima += (int) (statusBase.vidaMaxima * 1.1);
-		        this.vida += (int) (statusBase.vida * 1.1);
-		        this.velocidade +=  nivel;
-		        this.vidaInicial += (int) (statusBase.vida * 1.1);
-		        this.ataqueInicial += (int)(statusBase.ataque * 1.1);
-		        this.vidaMaximaInicial += (int)(statusBase.vidaMaxima * 1.1);
-			}
-		
-		
-		}
-		
-		/*resetarStatus();
 		double valor1 = ((this.nivel - 1) * 0.1);
 		this.ataque += (int) (statusBase.ataque * valor1);
 		this.vidaMaxima += (int) (statusBase.vidaMaxima * valor1);
@@ -237,20 +347,20 @@ public abstract class Personagem {
 		this.velocidade +=  nivel;
 		this.vidaInicial += (int) (statusBase.vida * valor1);
 		this.ataqueInicial += (int)(statusBase.ataque * valor1);
-		this.vidaMaximaInicial += (int)(statusBase.vidaMaxima * valor1);*/
+		this.vidaMaximaInicial += (int)(statusBase.vidaMaxima * valor1);
 	}
 	
 	public void StatusGrau() {
 		double valor1 = (this.grau * 0.3);
-		for(int i = 0; i <= this.nivel; i++) {
-			this.ataque += (int) (statusBase.ataque * 1.3);
-		    this.vidaMaxima += (int) (statusBase.vidaMaxima * 1.3);
-		    this.vida += (int) (statusBase.vida * 1.3);
+		
+			this.ataque += (int) (statusBase.ataque * valor1);
+		    this.vidaMaxima += (int) (statusBase.vidaMaxima * valor1);
+		    this.vida += (int) (statusBase.vida * valor1);
 		    this.velocidade += (grau * 3);
-		    this.vidaInicial += (int) (statusBase.vida * 1.3);
-		    this.ataqueInicial += (int)(statusBase.ataque * 1.3);
-		    this.vidaMaximaInicial += (int)(statusBase.vidaMaxima * 1.3);
-		}
+		    this.vidaInicial += (int) (statusBase.vida * valor1);
+		    this.ataqueInicial += (int)(statusBase.ataque * valor1);
+		    this.vidaMaximaInicial += (int)(statusBase.vidaMaxima * valor1);
+		
 		
 	}
 	
@@ -272,7 +382,7 @@ public abstract class Personagem {
 
 	    for (Habilidade h : habilidades) {
 	        if (h != null) {
-	            h.voltarCooldownInicial();
+	            h.resetarCooldown();;
 	        }
 	    }
 	}
@@ -380,12 +490,15 @@ public abstract class Personagem {
 	    if (!vivo) return;
 
 	    quantidade = (int)(quantidade * multiplicadorCura);
+	    
+	    if(listener != null)
+	        listener.onHeal(this, quantidade);
 
 	    vida = Math.min(vida + quantidade, vidaMaxima);
 	}
 
 
-	
+		
 	public void ganharProtecao(int quantidade) {
 		this.protecao += quantidade;
 	}
@@ -410,14 +523,18 @@ public abstract class Personagem {
 			this.vivo = false;
 		}
         if(ativar) this.Nocauteado(adversario, this, time1, null, dano);
-        
+        if(vida <= 0 && listener != null)
+            listener.onDeath(this);
 		
 	}
 	
-	public void reviver() {
+	public void reviver(int val) {
 		if (!this.vivo) {
 			this.vivo = true;
-			this.vida = (int) (vidaMaxima * 0.25); // Valor padrão de vida ao reviver
+			this.vida = (int) (val); // Valor padrão de vida ao reviver
+			 if(listener != null)
+			        listener.reviver(this, val);
+			
 		}
 	}
 	
@@ -477,19 +594,22 @@ public abstract class Personagem {
 	    }
 
 	    setUltimoAtacante(atacante);	
+	    
+	    if(listener != null) listener.onHit(this, danoSofrido);
 	    return danoSofrido;
 	}
 	
 
 	
 	public int danoDireto(int dano, Personagem atacante, List<Personagem> time1, List<Personagem> time2) {
-		dano *= (int)(multiplicadorDano);
+		dano = (int)(dano * multiplicadorDano);
 	    Random random = new Random();
 	    int danoSofrido = this.vida;
 	    int sorteio = random.nextInt(100);
         if (sorteio <= chanceCritico) {
         	dano = (int) (dano * this.danoCritico);
         	System.out.println("\n\n\n\nCritico\n\n\n\n");
+        	
         }
 		this.vida -= dano;
 		danoSofrido -= vida;
@@ -514,52 +634,124 @@ public abstract class Personagem {
 	    }
 
 	    setUltimoAtacante(atacante);	
+	    if(listener != null) listener.onHit(this, danoSofrido);
+
 	    return danoSofrido;
 	}
 
-	public int danoDOT(int dano, Personagem atacante,  List<Personagem> time1, List<Personagem> time2) {
-		if(!this.isVivo()) return 0;
-		int danoSofrido = this.vida;
-	    this.vida -= dano;
-	    danoSofrido -= vida;
-	    // 🔒 Nunca deixar HP negativo aqui
-	    if (vida < 0) vida = 0;     
-	    // 🔥 MORTE
-	    if (vida == 0) {
-	    	nocautear(atacante, time1, time2, true, danoSofrido);
-	    }   
-	    setUltimoAtacante(atacante);	
-	    return danoSofrido;
+	public int dilaceracao(int dano, Personagem atacante, List<Personagem> time1, List<Personagem> time2) {
+		if (!vivo) return 0;
+
+        int danoSofrido = (int)(dano - (dano * resisDilaceracao));
+
+        return receberDano(danoSofrido, atacante, time1, time2);
+
 	}
+	public int dilaceracaoDireta(int dano, Personagem atacante, List<Personagem> time1, List<Personagem> time2) {
+		if (!vivo) return 0;
 
+        int danoSofrido = (int)(dano - (dano * resisDilaceracao));
 
-	/*public List<Passiva> getPassivas() {
-	    return new ArrayList<>(passivas);
-	}*/
+        return danoDireto(danoSofrido, atacante, time1, time2);
+
+	}
+	
+	
+	public int danoDOT(int dano, Personagem atacante,
+            List<Personagem> time1, List<Personagem> time2) {
+		if (!vivo) return 0;
+
+        int danoSofrido = Math.min(dano, vida);
+        vida -= danoSofrido;
+
+        if (vida <= 0) {
+        vida = 0;
+        nocautear(atacante, time1, time2, true, danoSofrido);
+        }
+	    if(listener != null) listener.onHit(this, danoSofrido);
+
+        return danoSofrido;
+        }
 
 
 	// Novos métodos para gerenciar efeitos
-    public void aplicarEfeito(Efeito efeito) {
-        Efeito copia = efeito.copiar();
-        copia.applyImmediate(this);
-        efeitosAtivos.add(copia);
-    }
+	public void aplicarEfeito(Efeito efeito, Personagem atacante) {
+
+	    if (efeito == null) return;
+
+	    Efeito copia = efeito.copiar();
+
+	    copia.applyImmediate(this);
+
+	    efeitosAtivos.add(copia);
+	    if(listener != null)
+	        listener.onEffectApplied(this, efeito.getNomeEfeito());
+	}
+
+
 	
 	// Processa um ciclo/turno: aplica ticks, decrementa duração, remove efeitos expirados
-    public void processarEfeitosPorTurno() {
-        Iterator<Efeito> it = efeitosAtivos.iterator();
-        while (it.hasNext()) {
-            Efeito e = it.next();
-            List<Personagem> time1 = null;
-			List<Personagem> time2 = null;
-			e.applyTick(this, ultimoAtacante, time1, time2); // apenas DOT / HOT
-            e.setDuracao(e.getDuracao() - 1);
-            if (e.getDuracao() <= 0) {
-                e.removeEffect(this);
-                it.remove();
-            }
-        }
-    }
+	public void processarEfeitosInicioTurno(
+	        Personagem atacante,
+	        List<Personagem> time1,
+	        List<Personagem> time2) {
+
+	    Iterator<Efeito> it = efeitosAtivos.iterator();
+
+	    while (it.hasNext()) {
+	        Efeito efeito = it.next();
+
+	        // aplica DOT/HOT
+	        efeito.applyTick(this, atacante, time1, time2);
+
+	        // reduz duração
+	        efeito.reduzirDuracao();
+
+	        // remove se expirou
+	        if (efeito.expirou()) {
+	            efeito.removeEffect(this);
+	            it.remove();
+	        }
+	    }
+	}
+	
+	public void processarEfeitosFimTurno() {
+	    efeitosAtivos.removeIf(e -> {
+	        if (e.expirou()) {
+	            e.removeEffect(this);
+	            return true;
+	        }
+	        return false;
+	    });
+	}
+
+	public void removerEfeitosPorCategoria(Efeito.Categoria categoria) {
+	    Iterator<Efeito> it = efeitosAtivos.iterator();
+
+	    while (it.hasNext()) {
+	        Efeito e = it.next();
+
+	        if (e.getCategoria() == categoria) {
+	            e.removeEffect(this);
+	            it.remove();
+	        }
+	    }
+	}
+
+	public void removerPorTag(Efeito.TagEfeito tag) {
+	    Iterator<Efeito> it = efeitosAtivos.iterator();
+
+	    while (it.hasNext()) {
+	        Efeito e = it.next();
+
+	        if (e.getTag() == tag) {
+	            e.removeEffect(this);
+	            it.remove();
+	        }
+	    }
+	}
+
+
     
     /* ================= DOT ================= */
 
@@ -576,16 +768,17 @@ public abstract class Personagem {
      * Verifica se o personagem morrerá apenas pelos DOTs atuais
      */
     public boolean previsaoMortePorDOT() {
+        int totalDOT = 0;
 
-        int danoTotalDOT = efeitosAtivos.stream()
-            .filter(e ->
-            e.getKind() == Efeito.Kind.DAMAGE_OVER_TIME
-            )
-            .mapToInt(e -> e.getValor() * e.getDuracao())
-            .sum();
+        for (Efeito e : efeitosAtivos) {
+            if (e.getTag() == TagEfeito.DOT) {
+                totalDOT += e.getValor();
+            }
+        }
 
-        return danoTotalDOT >= getVida();
+        return totalDOT >= vida;
     }
+
 
    
     public boolean morreNoProximoTurnoPorDOT() {
@@ -604,7 +797,7 @@ public abstract class Personagem {
     
     public int getAtaqueFinal() {
         int ataqueFinal = ataque;
-        ataqueFinal *= (int) (multiplicadorDano);
+        ataqueFinal = (int)(ataqueFinal * multiplicadorDano);
         return Math.max(0, ataqueFinal);
     }
 
@@ -770,6 +963,17 @@ public abstract class Personagem {
 	    return habilidades[index];
 	}
 	
+	public String getDescricaoHabilidade(int index) {
+		if(index == 0) return this.descricaoHabilidade1();
+        	
+        else if(index == 1) return this.descricaoHabilidade2();
+        	
+        else if(index == 2) return this.descricaoHabilidade3();
+        	
+        else return this.descricaoHabilidade4();
+        	
+	}
+	
 	public String[] getHabilidadesTexto() {
 	    String[] textos = new String[4];
 	    for (int i = 0; i < 4; i++) {
@@ -786,20 +990,6 @@ public abstract class Personagem {
 	    return textos;
 	}
 
-	
-	public String listarHabilidades() {
-		String listaHabilidades = "\nHabilidades de " + this.nome + ": ";
-		for (int i = 0; i < habilidades.length; i++) {
-			Habilidade h = habilidades[i];
-			if (h != null) {
-				listaHabilidades += "\n" + (i + 1) + " - " + h.getNome() + ": " + h.getDescricao() +
-						(h.podeUsar() ? "" : " (CD: " + h.getCooldownAtual() + ")");
-			} else {
-				listaHabilidades += (i + 1) + " - Vazio";
-			}
-		}
-		return listaHabilidades;
-	}
 	
 	public String barraDeVida() {
 		int totalBarras = 20;
@@ -818,7 +1008,7 @@ public abstract class Personagem {
 		
 		
 		barra.append("]");
-		return barra.toString() + vida + "/" + vidaMaxima;
+		return /*barra.toString() + */vida + "/" + vidaMaxima;
 	}
 	
 	public String listarStatus() {
@@ -829,7 +1019,6 @@ public abstract class Personagem {
 				"Ataque: " + getAtaqueFinal() + "\n" +
 				"Velocidade: " + this.velocidade + "\n " + 
 				"Efeitos: " + getEfeitosTexto();
-				//listarHabilidades();
 	}
 	 public String listarResumoVida() {
 		 return this.getNome() + "   Defesa:" + getDefesaFinal() + "%  Protecão:" + getProtecao() + "  Nível: " + getNivel() + "\nVida: " + barraDeVida();
@@ -855,7 +1044,9 @@ public abstract class Personagem {
 		    sb.append("Dano Crítico: ").append((int)(getAtaqueFinal() * danoCritico)).append(" = " + danoCritico * 100 + "%\n");
 		    sb.append("Defesa: ").append(getDefesaFinal()).append("%\n");
 		    sb.append("Proteção: ").append(protecao).append("\n");
-		    sb.append("Velocidade: ").append(getVelocidadeFinal());
+		    sb.append("Velocidade: ").append(getVelocidadeFinal()).append("\n");
+		    sb.append("Descrição: ").append(this.descricao);
+		    
 
 		    return sb.toString();
 		}
@@ -876,10 +1067,11 @@ public abstract class Personagem {
 		        }
 
 		        sb.append(h.getNome()).append("\n");
-		        sb.append(h.getDescricao()).append("\n");
+		        sb.append(this.getDescricaoHabilidade(i)).append("\n");
+		        
 
 		        sb.append("Cooldown Inicial: ")
-		          .append(h.getCooldownInicial())
+		          .append(h.getCooldownAtual())
 		          .append("\nCooldown:")
 		          .append(h.getCooldownMax());
 
@@ -914,9 +1106,6 @@ public abstract class Personagem {
 		    
 		    sb.append("Passivas:\n").append(descricaoPassivas()).append("\n\n\n");
 
-		    sb.append("Efeitos ativos:\n");
-
-		    sb.append(getEfeitosTexto());
 
 		    return sb.toString();
 		}
@@ -943,7 +1132,7 @@ public abstract class Personagem {
 		        else sb.append(descricaoHabilidade4()).append("\n");
 		        
 		        sb.append("Cooldown: ")
-		          .append(h.getRecargaAtual())
+		         // .append(h.getRecargaAtual())
 		          .append("/")
 		          .append(h.getCooldownMax());
 
@@ -979,7 +1168,7 @@ public abstract class Personagem {
 	    for (int i = 0; i < habilidades.length; i++) {
 	        if (habilidades[i] != null &&
 	            habilidades[i].podeUsar() &&
-	            habilidades[i].aplicaCura()) {
+	            habilidades[i].causaCura()) {
 	            return i + 1;
 	        }
 	    }
@@ -990,7 +1179,7 @@ public abstract class Personagem {
 	    for (int i = 0; i < habilidades.length; i++) {
 	        if (habilidades[i] != null &&
 	            habilidades[i].podeUsar() &&
-	            habilidades[i].aplicaDano()) {
+	            habilidades[i].causaDano()) {
 	            return i + 1;
 	        }
 	    }
@@ -1011,4 +1200,45 @@ public abstract class Personagem {
 		return false;
 	}
 
+	
+	// ==========================
+	// VERIFICAÇÃO DE BUFFS
+	// ==========================
+
+	public boolean temBuffAtaque() {
+	    return efeitosAtivos.stream()
+	            .anyMatch(e -> e.getTag() == Efeito.TagEfeito.DANO);
+	}
+
+	public boolean temBuffDefesa() {
+	    return efeitosAtivos.stream()
+	            .anyMatch(e -> e.getTag() == Efeito.TagEfeito.DEFESA);
+	}
+
+	public boolean temBuffVelocidade() {
+	    return efeitosAtivos.stream()
+	            .anyMatch(e -> e.getTag() == Efeito.TagEfeito.VELOCIDADE);
+	}
+	
+	public boolean temDOTAlto() {
+	    return efeitosAtivos.stream().anyMatch(e ->
+	            e.getTag() == Efeito.TagEfeito.DOT ||
+	            (e.getTag() == Efeito.TagEfeito.DOT && e.getValor() > 5)
+	    );
+	}
+	public boolean temCuraDisponivel() {
+
+	    boolean curaAtiva = efeitosAtivos.stream()
+	            .anyMatch(e -> e.getTag() == Efeito.TagEfeito.CURA);
+
+	    /*boolean habilidadeCura = habilidades.stream()
+	            .filter(Habilidade::estaDisponivel)
+	            .anyMatch(h -> h.causaCura());
+*/
+	    return curaAtiva /*|| habilidadeCura*/;
+	}
+	public boolean isCongelado() {
+	    return efeitosAtivos.stream()
+	            .anyMatch(e -> e.getTag() == Efeito.TagEfeito.STUN);
+	}
 }

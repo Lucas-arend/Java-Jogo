@@ -2,6 +2,7 @@ package com.ia;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 
 import com.game.CaracteristicasHabilidade;
 import com.game.Habilidade;
@@ -9,27 +10,41 @@ import com.game.Personagem;
 
 public class IA {
 
+    private Random rng = new Random();
+
     /* ================= API ================= */
 
     public int escolherIndiceHabilidadeIA(Personagem ia, Personagem alvo) {
 
+        if (ia.isStun())
+            return -1;
+
         List<Habilidade> habilidades = ia.getHabilidadesLista().stream()
                 .filter(Habilidade::estaDisponivel)
-                .filter(h -> habilidadeEhUtil(h, ia, alvo))
+                .filter(h -> habilidadePermitida(h, ia))
                 .toList();
 
         if (habilidades.isEmpty()) return -1;
 
         EstadoIA estado = definirEstado(ia, alvo);
 
-        // ⚠️ FINALIZAÇÃO ABSOLUTA
+        // ⭐ PRIORIDADE ABSOLUTA
+        Habilidade prioridadeAlta = habilidades.stream()
+                .filter(h -> h.getPrioridade() > 0)
+                .max(Comparator.comparingInt(Habilidade::getPrioridade))
+                .orElse(null);
+
+        if (prioridadeAlta != null && prioridadeAlta.podeUsar())
+            return ia.getIndiceHabilidade(prioridadeAlta) + 1;
+
+        // FINALIZAÇÃO
         if (estado == EstadoIA.FINALIZADOR) {
             Habilidade finalizar = buscarFinalizacao(habilidades, ia, alvo);
             if (finalizar != null)
                 return ia.getIndiceHabilidade(finalizar) + 1;
         }
 
-        // ⚠️ SOBREVIVÊNCIA ABSOLUTA
+        // SOBREVIVÊNCIA
         if (estado == EstadoIA.SOBREVIVENCIA) {
             Habilidade cura = buscarCura(habilidades, ia);
             if (cura != null)
@@ -44,75 +59,48 @@ public class IA {
         return melhor == null ? -1 : ia.getIndiceHabilidade(melhor) + 1;
     }
 
-    /* ================= ESTADO ================= */
+    /* ================= LEITURA TÁTICA ================= */
 
-    private EstadoIA definirEstado(Personagem ia, Personagem alvo) {
-
-        double vidaIA = ia.getVida() / (double) ia.getVidaMaxima();
-        double vidaAlvo = alvo.getVida() / (double) alvo.getVidaMaxima();
-
-        if (vidaIA < 0.30 || ia.estaSofrendoDOT())
-            return EstadoIA.SOBREVIVENCIA;
-
-        if (alvo.previsaoMortePorDOT() || vidaAlvo < 0.30)
-            return EstadoIA.FINALIZADOR;
-
-        if (ia.getAtaque() > alvo.getDefesa() &&
-            ia.getVelocidade() >= alvo.getVelocidade())
-            return EstadoIA.AGRESSIVO;
-
-        return EstadoIA.CONTROLE;
+    private boolean alvoJaControlado(Personagem alvo) {
+        return alvo.isStun() || alvo.isSilenciado() || alvo.isCongelado();
     }
 
-    /* ================= LEITURA DO ALVO ================= */
-
-    private boolean alvoTemCuraDisponivel(Personagem alvo) {
-        return alvo.getHabilidadesLista().stream()
-                .filter(Habilidade::estaDisponivel)
-                .anyMatch(h -> h.getCaracteristicasHabilidade().stream().anyMatch(c ->
-                        c == CaracteristicasHabilidade.CURA ||
-                        c == CaracteristicasHabilidade.CURA_MEDIANA ||
-                        c == CaracteristicasHabilidade.CURA_ALTA));
+    private boolean inimigoBuffado(Personagem alvo) {
+        return alvo.temBuffAtaque() ||
+               alvo.temBuffDefesa() ||
+               alvo.temBuffVelocidade();
     }
 
-    private boolean alvoTemDefesaDisponivel(Personagem alvo) {
-        return alvo.getHabilidadesLista().stream()
-                .filter(Habilidade::estaDisponivel)
-                .anyMatch(h -> h.getCaracteristicasHabilidade().stream().anyMatch(c ->
-                        c == CaracteristicasHabilidade.DEFESA ||
-                        c == CaracteristicasHabilidade.PROTECAO));
+    private double calcularAmeaca(Personagem alvo) {
+        double ameaca = alvo.getAtaqueFinal() * 0.6;
+
+        if (alvo.getVelocidade() > 90)
+            ameaca += 15;
+
+        if (alvo.temBuffAtaque())
+            ameaca += 20;
+
+        if (alvo.temDOTAlto())
+            ameaca += 10;
+
+        return ameaca;
     }
 
-    private boolean alvoTemBuffAtaque(Personagem alvo) {
-        return alvo.getHabilidadesLista().stream()
-                .filter(Habilidade::estaDisponivel)
-                .anyMatch(h -> h.getCaracteristicasHabilidade()
-                        .contains(CaracteristicasHabilidade.AUMENTO_DE_ATAQUE));
-    }
+    private boolean danoExcessivo(Habilidade h, Personagem alvo, Personagem ia) {
+        if (!h.causaDano()) return false;
 
-    private boolean alvoDefesaAlta(Personagem alvo, Personagem ia) {
-        return alvo.getDefesa() > ia.getAtaque() * 0.7;
+        double danoEstimado = ia.getAtaqueFinal();
+        return danoEstimado > alvo.getVida() * 1.8;
     }
 
     /* ================= BUSCAS ================= */
 
-    private Habilidade buscarFinalizacao(
-            List<Habilidade> habilidades,
-            Personagem ia,
-            Personagem alvo
-    ) {
-        for (Habilidade h : habilidades) {
-
-            if (h.getCaracteristicasHabilidade()
-                    .contains(CaracteristicasHabilidade.DANO_LETAL))
-                return h;
-
-            if (h.getCaracteristicasHabilidade()
-                    .contains(CaracteristicasHabilidade.DANO_ALTO)
-                    && alvo.getVida() <= ia.getAtaque())
-                return h;
-        }
-        return null;
+    private Habilidade buscarFinalizacao(List<Habilidade> habilidades, Personagem ia, Personagem alvo) {
+        return habilidades.stream()
+                .filter(Habilidade::causaDano)
+                .filter(h -> alvo.getVida() < ia.getAtaqueFinal())
+                .max(Comparator.comparingInt(Habilidade::getPesoIA))
+                .orElse(null);
     }
 
     private Habilidade buscarCura(List<Habilidade> habilidades, Personagem ia) {
@@ -120,18 +108,14 @@ public class IA {
         if (vidaPct > 0.60) return null;
 
         return habilidades.stream()
-                .filter(h -> h.getCaracteristicasHabilidade().stream().anyMatch(c ->
-                        c == CaracteristicasHabilidade.CURA ||
-                        c == CaracteristicasHabilidade.CURA_MEDIANA ||
-                        c == CaracteristicasHabilidade.CURA_ALTA))
-                .findFirst()
+                .filter(Habilidade::causaCura)
+                .max(Comparator.comparingInt(Habilidade::getPesoIA))
                 .orElse(null);
     }
 
     /* ================= SCORE ================= */
 
-    @SuppressWarnings("incomplete-switch")
-	private double pontuarHabilidade(
+    private double pontuarHabilidade(
             Habilidade h,
             Personagem ia,
             Personagem alvo,
@@ -140,118 +124,92 @@ public class IA {
 
         double score = 0;
 
-        boolean alvoVaiMorrerPorDOT = alvo.previsaoMortePorDOT();
-        boolean alvoPodeCura = alvoTemCuraDisponivel(alvo);
-        @SuppressWarnings("unused")
-		boolean alvoPodeDefender = alvoTemDefesaDisponivel(alvo);
-        boolean alvoBuffaAtaque = alvoTemBuffAtaque(alvo);
-        boolean defesaAlta = alvoDefesaAlta(alvo, ia);
+        boolean alvoMaisRapido = alvo.getVelocidade() > ia.getVelocidade();
+
+        // combo: alvo controlado → dano pesado
+        if (alvoJaControlado(alvo) &&
+            h.getCaracteristicasHabilidade().contains(CaracteristicasHabilidade.DANO_ALTO))
+            score += 12;
 
         for (CaracteristicasHabilidade c : h.getCaracteristicasHabilidade()) {
 
             switch (c) {
 
-                /* ===== DANO ===== */
-                case DANO_BAIXO -> score += defesaAlta ? -5 : 2;
-                case DANO -> score += defesaAlta ? -3 : (estado == EstadoIA.AGRESSIVO ? 8 : 3);
-                case DANO_MEDIANO -> score += defesaAlta ? -1 : (estado == EstadoIA.AGRESSIVO ? 10 : 4);
-                case DANO_ALTO -> {
-                    score += estado == EstadoIA.AGRESSIVO ? 14 : 5;
-                    if (alvoPodeCura && alvo.getVida() < alvo.getVidaMaxima() * 0.5)
-                        score += 12; // matar antes da cura
-                }
-                case DANO_LETAL -> score += 100;
+                case DOT -> score += 6;
+                case DOT_ALTO -> score += 10;
 
-                /* ===== CURA ===== */
-                case BAIXA_CURA -> score += curaPeso(ia, 3, estado);
-                case CURA -> score += curaPeso(ia, 6, estado);
-                case CURA_MEDIANA -> score += curaPeso(ia, 9, estado);
-                case CURA_ALTA -> score += curaPeso(ia, 14, estado);
-
-                /* ===== DEFESA ===== */
-                case DEFESA, PROTECAO -> {
-                    if (alvoBuffaAtaque)
-                        score += 16;
-                    else if (estado == EstadoIA.SOBREVIVENCIA)
-                        score += defesaPeso(ia, 18);
-                    else
-                        score -= 5;
+                case ATORDOAR -> {
+                    if (!alvoJaControlado(alvo)) {
+                        score += alvoMaisRapido ? 20 : 10;
+                        if (estado == EstadoIA.CONTROLE)
+                            score += 12;
+                    } else score -= 8;
                 }
 
-                /* ===== BUFF ===== */
-                case AUMENTO_DE_ATAQUE -> {
-                    if (estado == EstadoIA.SOBREVIVENCIA || alvoVaiMorrerPorDOT)
-                        score -= 60;
-                    else
-                        score += 6;
+                /*case SILENCIO -> {
+                    if (alvo.temBuffAtaque() || alvo.temCuraDisponivel())
+                        score += 18;
+                    else score += 6;
                 }
 
-                case AUMENTO_DE_VELOCIDADE ->
-                        score += estado == EstadoIA.CONTROLE ? 8 : 3;
-
-                /* ===== DEBUFF ===== */
-                case REDUCAO_DE_ATAQUE -> {
-                    if (alvo.getAtaque() > ia.getVida() * 0.25)
+                case REMOVER_BUFF -> {
+                    if (inimigoBuffado(alvo))
                         score += 20;
-                    else
-                        score += estado == EstadoIA.CONTROLE ? 12 : 4;
-                }
+                    else score += 5;
+                }*/
 
-                case REDUCAO_DE_VELOCIDADE ->
-                        score += alvo.getVelocidade() > ia.getVelocidade() ? 10 : 3;
+                case DEFESA, PROTECAO ->
+                        score += estado == EstadoIA.SOBREVIVENCIA ? 18 : 4;
 
-                case MENOS_DEFESA, MENOS_PROTECAO ->
-                        score += defesaAlta ? 18 : (estado == EstadoIA.CONTROLE ? 10 : 3);
+                case CURA, CURA_MEDIANA, CURA_ALTA ->
+                        score += estado == EstadoIA.SOBREVIVENCIA ? 22 : 5;
 
-                /* ===== REVIVER ===== */
-                case REVIVER ->
-                        score += ia.getVida() <= 0 ? 100 : -300;
-                        
-                case REDUZIR_COOLDOWN -> 
-                     score += estado == EstadoIA.CONTROLE ? 15 : 5;
-                     
-                case AUMENTAR_COOLDOWN ->
-                     score += estado == EstadoIA.CONTROLE ? 16 : 6;
+                case DANO_ALTO -> score += 15;
+                case DANO_LETAL -> score += 25;
             }
         }
 
-        score -= estado == EstadoIA.SOBREVIVENCIA
-                ? h.getCooldownAtual() * 1.2
-                : h.getCooldownAtual() * 0.8;
+        if (danoExcessivo(h, alvo, ia))
+            score -= 10;
 
-        if (ia.getVelocidade() > alvo.getVelocidade())
-            score += 2;
+        score += calcularAmeaca(alvo) * 0.15;
+
+        score -= h.getCooldownAtual() * 0.8;
+
+        // variação humana
+        score *= (0.92 + rng.nextDouble() * 0.16);
 
         return score;
     }
 
+    /* ================= ESTADO ================= */
+
+    private EstadoIA definirEstado(Personagem ia, Personagem alvo) {
+
+        double vidaIA = ia.getVida() / (double) ia.getVidaMaxima();
+        double vidaAlvo = alvo.getVida() / (double) alvo.getVidaMaxima();
+
+        if (vidaIA < 0.35 || calcularAmeaca(alvo) > 60)
+            return EstadoIA.SOBREVIVENCIA;
+
+        if (vidaAlvo < 0.25)
+            return EstadoIA.FINALIZADOR;
+
+        if (alvo.isStun() || alvo.isSilenciado())
+            return EstadoIA.AGRESSIVO;
+
+        if (ia.getVelocidade() < alvo.getVelocidade())
+            return EstadoIA.CONTROLE;
+
+        return EstadoIA.AGRESSIVO;
+    }
+
     /* ================= FILTROS ================= */
 
-    private boolean habilidadeEhUtil(Habilidade h, Personagem ia, Personagem alvo) {
-
-        if (alvo.previsaoMortePorDOT() &&
-            (h.getCaracteristicasHabilidade().contains(CaracteristicasHabilidade.DEFESA)
-            || h.getCaracteristicasHabilidade().contains(CaracteristicasHabilidade.PROTECAO)))
+    private boolean habilidadePermitida(Habilidade h, Personagem ia) {
+        if (ia.isSilenciado() && !h.ignoraSilencio())
             return false;
-
-        if (alvoDefesaAlta(alvo, ia) &&
-            h.getCaracteristicasHabilidade().contains(CaracteristicasHabilidade.DANO_BAIXO))
-            return false;
-
         return true;
-    }
-
-    /* ================= PESOS ================= */
-
-    private double curaPeso(Personagem ia, double base, EstadoIA estado) {
-        double vidaPct = ia.getVida() / (double) ia.getVidaMaxima();
-        double peso = base * (1.0 - vidaPct) * 2;
-        return estado == EstadoIA.SOBREVIVENCIA ? peso * 2.5 : peso;
-    }
-
-    private double defesaPeso(Personagem ia, double base) {
-        double vidaPct = ia.getVida() / (double) ia.getVidaMaxima();
-        return base * (1.0 - vidaPct);
     }
 
     /* ================= ENUM ================= */

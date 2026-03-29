@@ -194,7 +194,7 @@ public class TelaSelecaoDeck extends JFrame {
         List<Personagem> disponiveis = new ArrayList<>();
 
         for (Personagem p : conta.getTodosPersonagens()) {
-            if (p.getDesbloqueado() && !conta.getDeck().contains(p)) {
+            if (/*p.getDesbloqueado() &&*/!conta.getDeck().contains(p)) {
                 disponiveis.add(p);
             }
         }

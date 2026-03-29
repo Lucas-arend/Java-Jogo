@@ -87,8 +87,11 @@ public class TelaInicial extends JFrame {
 	    List<Personagem> disponiveis = contaIA.getTodosPersonagens();
 	    Collections.shuffle(disponiveis);
 
-	    for (int i = 0; i < Math.min(4, disponiveis.size()); i++) {
+	    System.out.println(conta.getDeck().size());
+	    for (int i = 0; i < Math.min(conta.getDeck().size(), disponiveis.size()); i++) {
+	    	disponiveis.get(i).setNivel(conta.getDeck().get(i).getNivel());
 	        contaIA.adicionarAoDeck(disponiveis.get(i).getId());
+	        
 	    }
 
 	    List<Personagem> timeIA = contaIA.getDeck().stream()

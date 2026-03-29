@@ -25,12 +25,12 @@ public class Fenix extends Personagem {
 	            1,
 	            Tipo.FOGO,
 	            Classe.SUPORTE,
-	            Raridade.LENDARIO,
+	            Raridade.LENDÁRIO,
 	            "Cura a si mesma e causa dano em área",
 	            new StatusBase(
 	                1800, // vidaMaxima
 	                1800,  // vida
-	                700,  // ataque
+	                500,  // ataque
 	                10,   // defesa %
 	                110,   // velocidade
 	                0,   // proteção
@@ -38,13 +38,12 @@ public class Fenix extends Personagem {
 	                1.25   // dano crítico
 	            )
 	        );
-		habilidades[0] = new com.game.Habilidade("Bicada quente", descricaoHabilidade1(), Arrays.asList(CaracteristicasHabilidade.DANO_BAIXO, CaracteristicasHabilidade.MENOS_DEFESA), 0, 0); // começa disponível
-        habilidades[1] = new com.game.Habilidade("Explosão de Fogo", descricaoHabilidade2(), Arrays.asList(CaracteristicasHabilidade.DANO, CaracteristicasHabilidade.DOT), 0, 3); // começa em CD
-	    habilidades[2] = new com.game.Habilidade("Alta vitalidade", descricaoHabilidade3(), Arrays.asList(CaracteristicasHabilidade.CURA_ALTA), 2, 3); // começa em CD
-	    habilidades[3] = new com.game.Habilidade("Renascimento", descricaoHabilidade4(), Arrays.asList(CaracteristicasHabilidade.REVIVER,CaracteristicasHabilidade.CURA_PROLONGADA), 3, 3); // começa em CD;
+		habilidades[0] = new com.game.Habilidade("Bicada quente", Arrays.asList(CaracteristicasHabilidade.DANO_BAIXO, CaracteristicasHabilidade.MENOS_DEFESA), 0, 0, this); // começa disponível
+        habilidades[1] = new com.game.Habilidade("Explosão de Fogo", Arrays.asList(CaracteristicasHabilidade.DANO, CaracteristicasHabilidade.DOT), 0, 3, this); // começa em CD
+	    habilidades[2] = new com.game.Habilidade("Alta vitalidade", Arrays.asList(CaracteristicasHabilidade.CURA_ALTA), 2, 3, this); // começa em CD
+	    habilidades[3] = new com.game.Habilidade("Renascimento", Arrays.asList(CaracteristicasHabilidade.REVIVER,CaracteristicasHabilidade.CURA_PROLONGADA), 3, 3, this); // começa em CD;
 	    
-	    //adicionarImagem();
-	
+	    setResisDOT(1);
 	}
 		
 	@Override
@@ -132,7 +131,7 @@ public class Fenix extends Personagem {
 			List<Personagem> time2) {
 		System.out.println(this.getNome() + " usa Chama Revitalizante!");
 		int dano = (int) (this.getAtaqueFinal());
-		alvo.aplicarEfeito(ListaEfeitos.reducaoDefesa(20, 3).copiar());
+		alvo.aplicarEfeito(ListaEfeitos.reducaoDefesa("Redução de Defesa", 20, 3).copiar(), this);
 		alvo.receberDano(dano, this, time1, time2);
 		System.out.println(alvo.getNome() + " recebe " + dano + " de dano e perde 20% de sua defesa por 3 turnos!");
 		return true;
@@ -145,7 +144,7 @@ public class Fenix extends Personagem {
 		int dano = this.getAtaqueFinal(); // Dano base da explosão de fogo
 		alvo.receberDano(dano, this, time1, time2);
 		int danoQueimadura = (int) (this.getAtaqueFinal() / 4); // Dano de queimadura por turno
-		alvo.aplicarEfeito(com.game.ListaEfeitos.danoProlongado("Queimaduras", danoQueimadura, 3)); // Aplica queimadura por 5 turnos
+		alvo.aplicarEfeito(com.game.ListaEfeitos.danoProlongado("Queimaduras", danoQueimadura, 3), this); // Aplica queimadura por 5 turnos
 		System.out.println(alvo.getNome() + " recebe " + dano + " de dano e sofre " + danoQueimadura + " de dano por 3 turnos!");
 		return true;
 	}
@@ -157,7 +156,7 @@ public class Fenix extends Personagem {
 		int curaInstantanea = (int) (this.getVidaMaxima() * 0.3); // Cura instantânea de 30% da vida máxima
 		int time = time1.size();
 		for(int i = 0; i < time; i++) {
-			int cura = (int) (time1.get(i).getVidaMaxima() * 3);
+			int cura = (int) (time1.get(i).getVidaMaxima() * 0.1);
 			time1.get(i).curar(cura);
 			System.out.println(time1.get(i).getNome() + " recupera " + cura + " de vida instantaneamente!");
 		}
@@ -171,8 +170,10 @@ public class Fenix extends Personagem {
 		System.out.println(this.getNome() + " usa Renascimento!");
 		Reviver = true;
 		int cura = (int) (getAtaqueFinal() / 3); // Cura base da habilidade
-		this.aplicarEfeito(com.game.ListaEfeitos.curaProlongada(cura, 4)); 
-		System.out.println(this.getNome() + " recebe " + cura + " de vida por 3 turnos e vai renascer na(s) "+ Reviver + " próxima vez que for derrotada!");
+		this.aplicarEfeito(com.game.ListaEfeitos.curaProlongada("Cura Prolongada", cura, 4), this); 
+		for(int i = 0; i < time1.size(); i++) {
+			time1.get(i).reviver((int)(time1.get(i).getVidaMaxima() * 0.2));
+		}
 		return true;
 	}
 
@@ -191,13 +192,13 @@ public class Fenix extends Personagem {
 	@Override
 	protected String descricaoHabilidade3() {
 		// TODO Auto-generated method stub
-		return "A Fênix cura 60% de sua vida e cura 30% da vida de seus aliados.";
+		return "A Fênix cura 40% de sua vida e cura 10% da vida de seus aliados.";
 	}
 
 	@Override
 	protected String descricaoHabilidade4() {
 		// TODO Auto-generated method stub
-		return "A Fênix Flamejante emite uma chama curativa que regenera " + (int)(this.getAtaqueFinal() / 3) + " sua vida por 4 turnos e ela renascera na próxima vez que for nocauteada.";
+		return "A Fênix Flamejante emite uma chama curativa que regenera " + (int)(this.getAtaqueFinal() / 3) + " sua vida por 4 turnos, ela renascera na próxima vez que for nocauteada e revive os aliados nocauteados com 20% da vida.";
 	}
 
 

@@ -21,7 +21,7 @@ public class Ciclope extends Personagem {
 				1,
 	            Tipo.TERRA,
 	            Classe.GUERREIRO,
-	            Raridade.EPICO,
+	            Raridade.ÉPICO,
 	            "Um enorme guerreiro com apenas um olho e uma fome insaciavel",
 	            new StatusBase(
 	                2200, // vidaMaxima
@@ -34,10 +34,10 @@ public class Ciclope extends Personagem {
 	                1.25   // dano crítico
 	            )
 	        );
-		habilidades[0] = new Habilidade("Golpe brutal", descricaoHabilidade1(), Arrays.asList(CaracteristicasHabilidade.DANO), 0, 0);
-	    habilidades[1] = new Habilidade("Golpe duplo desacelerador", descricaoHabilidade2(), Arrays.asList(CaracteristicasHabilidade.DANO_BAIXO, CaracteristicasHabilidade.REDUCAO_DE_VELOCIDADE),0, 0); // começa em CD
-	    habilidades[2] = new Habilidade("Fome", descricaoHabilidade3(),Arrays.asList(CaracteristicasHabilidade.REDUZIR_COOLDOWN), 0, 3);
-	    habilidades[3] = new Habilidade("Devorar", descricaoHabilidade4(), Arrays.asList( CaracteristicasHabilidade.GOLPE_DIRETO, CaracteristicasHabilidade.DANO_LETAL,CaracteristicasHabilidade.CURA), 5, 5); // começa em CD
+		habilidades[0] = new Habilidade("Golpe brutal", Arrays.asList(CaracteristicasHabilidade.DANO), 0, 0, this);
+	    habilidades[1] = new Habilidade("Golpe duplo desacelerador", Arrays.asList(CaracteristicasHabilidade.DANO_BAIXO, CaracteristicasHabilidade.REDUCAO_DE_VELOCIDADE),0, 0, this); // começa em CD
+	    habilidades[2] = new Habilidade("Fome", Arrays.asList(CaracteristicasHabilidade.REDUZIR_COOLDOWN), 0, 3, this);
+	    habilidades[3] = new Habilidade("Devorar", Arrays.asList( CaracteristicasHabilidade.GOLPE_DIRETO, CaracteristicasHabilidade.DANO_LETAL,CaracteristicasHabilidade.CURA), 5, 5, this); // começa em CD
 				
 	}
 
@@ -78,7 +78,7 @@ public class Ciclope extends Personagem {
 
 	@Override
 	protected void AoNocautear(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
-		this.aplicarEfeito(ListaEfeitos.aumentoAtaque(100, 2));
+		this.aplicarEfeito(ListaEfeitos.aumentoAtaque("Aumento de Dano", 100, 2), this);
 		
 	}
 
@@ -115,7 +115,7 @@ public class Ciclope extends Personagem {
 	@Override
 	protected boolean Habilidade1(Habilidade habilidade1, Personagem alvo, Personagem atacante, List<Personagem> time1,
 			List<Personagem> time2) {
-    	int dano = (int) (this.getAtaqueFinal() * 1.2);
+    	int dano = (int) (this.getAtaqueFinal());
     	alvo.receberDano(dano, this, time1, time2);
     	System.out.println(alvo.getNome() + " recebe " + dano + " de dano!");
     	return true;
@@ -124,11 +124,10 @@ public class Ciclope extends Personagem {
 	@Override
 	protected boolean Habilidade2(Habilidade habilidade2, Personagem alvo, Personagem atacante, List<Personagem> time1,
 			List<Personagem> time2) {
-		alvo.aplicarEfeito(com.game.ListaEfeitos.desaceleracao(100, 2));
-    	int dano = (int) (this.getAtaqueFinal() * 0.6);
+		alvo.aplicarEfeito(ListaEfeitos.desaceleracao("Desaceloração", 20, 2), this);
+    	int dano = (int) (this.getAtaqueFinal() * 0.4);
     	alvo.receberDano(dano, this, time1, time2);
     	alvo.receberDano(dano, this, time1, time2);
-    	System.out.println(alvo.getNome() + " recebe " + dano + " de dano 2 vezes e perde 100% da velocidade por 2 turnos!");
 		return true;
 	}
 
@@ -136,7 +135,7 @@ public class Ciclope extends Personagem {
 	protected boolean Habilidade3(Habilidade habilidade3, Personagem alvo, Personagem atacante, List<Personagem> time1,
 			List<Personagem> time2) {
 		this.habilidades[3].reduzirCooldown();
-    	this.aplicarEfeito(ListaEfeitos.aumentoDefesa(25, 2));
+    	this.aplicarEfeito(ListaEfeitos.aumentoDefesa("Aumento de Defesa", 20, 2), this);
 		return true;
 	}
 
@@ -144,7 +143,7 @@ public class Ciclope extends Personagem {
 	protected boolean Habilidade4(Habilidade habilidade4, Personagem alvo, Personagem atacante, List<Personagem> time1,
 			List<Personagem> time2) {
 		int cura = (int) (alvo.getVidaMaxima());
-    	alvo.danoDireto(alvo.getVidaMaxima(), this, time1, time2);
+    	alvo.dilaceracaoDireta(alvo.getVidaMaxima(), this, time1, time2);
     	this.setVidaMaxima((int) (this.getVidaMaxima() + (this.getVidaMaximaInicial() * 0.2)));
     	this.curar(cura);
     	System.out.println(alvo.getNome() + " é nocauteado e devorado por " + this.getNome() + " que rcupera vida equivalente à vida máxima de " + alvo.getNome() + " (" + cura + ")!");
@@ -154,19 +153,19 @@ public class Ciclope extends Personagem {
 	@Override
 	protected String descricaoHabilidade1() {
 		// TODO Auto-generated method stub
-		return "Causa " + (int)(this.getAtaqueFinal() * 1.2) + " de dano.";
+		return "Causa " + (int)(this.getAtaqueFinal()) + " de dano.";
 	}
 
 	@Override
 	protected String descricaoHabilidade2() {
 		// TODO Auto-generated method stub
-		return "Causa " + (int)(this.getAtaqueFinal() * 0.6) + " de dano 2 vezes e reduz a velocidade do alvo em 100% por 2 turnos.";
+		return "Causa " + (int)(this.getAtaqueFinal() * 0.4) + " de dano 2 vezes e reduz a velocidade do alvo em 20% por 2 turnos.";
 	}
 
 	@Override
 	protected String descricaoHabilidade3() {
 		// TODO Auto-generated method stub
-		return "Reduz o tempo de carga de Devorar em 1 e recebe um aumento de 25% de defesa por 2 turnos!";
+		return "Reduz o tempo de carga de Devorar em 1 e recebe um aumento de 20% de defesa por 2 turnos!";
 	}
 
 	@Override

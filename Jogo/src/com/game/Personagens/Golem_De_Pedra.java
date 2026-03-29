@@ -26,7 +26,7 @@ public class Golem_De_Pedra extends Personagem{
 	            new StatusBase(
 	                5000, // vidaMaxima
 	                5000,  // vida
-	                200,  // ataque
+	                300,  // ataque
 	                50,   // defesa %
 	                40,   // velocidade
 	                0,   // proteção
@@ -34,10 +34,10 @@ public class Golem_De_Pedra extends Personagem{
 	                1.25   // dano crítico
 	            )
 	        );
-		habilidades[0] = new Habilidade("Golpe resiliente", descricaoHabilidade1(), Arrays.asList(CaracteristicasHabilidade.DANO, CaracteristicasHabilidade.DEFESA), 0, 0);
-	    habilidades[1] = new Habilidade("Absorção de defesa", descricaoHabilidade2(), Arrays.asList(CaracteristicasHabilidade.DEFESA, CaracteristicasHabilidade.MENOS_DEFESA), 1, 5); // começa em CD
-	    habilidades[2] = new Habilidade("Proteção do time", descricaoHabilidade3(), Arrays.asList(CaracteristicasHabilidade.DEFESA, CaracteristicasHabilidade.MENOS_DEFESA), 3, 4);
-	    habilidades[3] = new Habilidade("Deslisamento", descricaoHabilidade4(), Arrays.asList(CaracteristicasHabilidade.DANO_LETAL), 4, 2); // começa em CD
+		habilidades[0] = new Habilidade("Golpe resiliente", Arrays.asList(CaracteristicasHabilidade.DANO, CaracteristicasHabilidade.DEFESA), 0, 0, this);
+	    habilidades[1] = new Habilidade("Absorção de defesa", Arrays.asList(CaracteristicasHabilidade.DEFESA, CaracteristicasHabilidade.MENOS_DEFESA), 1, 5, this); // começa em CD
+	    habilidades[2] = new Habilidade("Proteção do time", Arrays.asList(CaracteristicasHabilidade.DEFESA, CaracteristicasHabilidade.MENOS_DEFESA), 3, 4, this);
+	    habilidades[3] = new Habilidade("Deslisamento", Arrays.asList(CaracteristicasHabilidade.DANO_LETAL, CaracteristicasHabilidade.DANO_EM_AREA), 4, 3, this); // começa em CD
 
 	}
 
@@ -92,21 +92,6 @@ public class Golem_De_Pedra extends Personagem{
 
 	@Override
 	protected void inicioDoTurno(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
-		if (this.estaVivo()) {
-					int val = time2.size();
-		for(int i = 0; i < val; i++) {
-			time2.get(i).aplicarEfeito(ListaEfeitos.reducaoCura(100, 1));
-			System.out.println(time2.get(i).getNome() + " Tem sua cura reduzida em "+ 100 + "% por "+ 1 + " turno).");
-		}
-		int val2 = time1.size();
-		for(int i = 0; i < val2; i++) {
-			time1.get(i).aplicarEfeito(ListaEfeitos.reducaoCura(100, 1));
-			if (time1.get(i).getNome() != this.getNome()) {
-				System.out.println(time1.get(i).getNome() + " Tem sua cura reduzida em "+ 100 + "% por "+ 1 + " turno.");
-				
-			}else System.out.println(time1.get(i).getNome() + " Tem sua cura reduzida em "+ 100 + "% por "+ 1 + " turno).");
-		}
-		}
 
 		
 	}
@@ -128,15 +113,21 @@ public class Golem_De_Pedra extends Personagem{
 	@Override
 	protected String descricaoPassivas() {
 		// TODO Auto-generated method stub
-		return "O " + getNome() + " reduz a cura de todos na batalha em 100%!";
+		return "Sem passivas disponíveis!";
 	}
 
 	@Override
 	protected boolean Habilidade1(Habilidade habilidade1, Personagem alvo, Personagem atacante, List<Personagem> time1,
 			List<Personagem> time2) {
-		int danoInicial = this.getAtaqueFinal(); // Dano base da investida
-		this.aplicarEfeito(ListaEfeitos.aumentoDefesa(10, 1));
-			alvo.receberDano(danoInicial, this, time1, time2);		return true;
+		int val = time2.size();
+		int dano = (int) (this.getAtaqueFinal() / 3);
+		for(int i = 0; i < val; i++) {
+			if(time2.get(i).getDefesa() > 0) {
+				time2.get(i).receberDano(dano, atacante, time1, time2);
+			}
+			
+		}		
+			return true;
 	}
 
 	@Override
@@ -147,13 +138,13 @@ public class Golem_De_Pedra extends Personagem{
 			for(int i = 0; i < val; i++) {
 				if(time2.get(i).getDefesa() > 0) {
 					int temp = time2.get(i).getDefesa();
-					time2.get(i).aplicarEfeito(ListaEfeitos.reducaoDefesa(temp, 2));
+					time2.get(i).aplicarEfeito(ListaEfeitos.reducaoDefesa("Redução de Defesa", temp, 2), this);
 					def += temp;
 				System.out.println(time2.get(i).getNome() + " Tem sua defesa reduzida em "+ temp + "% por "+ 1 + " turno).");
 				}
 				
 			}
-			this.aplicarEfeito(ListaEfeitos.aumentoDefesa(def, 2));		return true;
+			this.aplicarEfeito(ListaEfeitos.aumentoDefesa("Aumento de Defesa", def, 2), this);		return true;
 	}
 
 	@Override
@@ -161,10 +152,10 @@ public class Golem_De_Pedra extends Personagem{
 			List<Personagem> time2) {
 			int val = this.getDefesaFinal();
 				int def = (int) (val / (time1.size() - 1));
-				this.aplicarEfeito(ListaEfeitos.reducaoDefesa(val, 2));
+				this.aplicarEfeito(ListaEfeitos.reducaoDefesa("Redução de Defesa", val, 2), this);
 				for(int i = 0; i < time1.size(); i++) {
 					if(time1.get(i).getNome() != this.getNome()) {
-						time1.get(i).aplicarEfeito(ListaEfeitos.aumentoDefesa(def, 2));
+						time1.get(i).aplicarEfeito(ListaEfeitos.aumentoDefesa("Aumento de Defesa", def, 2), this);
 					}
 				}
 				return true;
@@ -188,7 +179,7 @@ public class Golem_De_Pedra extends Personagem{
 	@Override
 	protected String descricaoHabilidade1() {
 		// TODO Auto-generated method stub
-		return " causa " + this.getAtaqueFinal() + " dedano e aumenta sua defesa em 10% por 1 turno.";
+		return "Causa " + (int)(this.getAtaqueFinal() / 3) + " de dano a todos os adversários.";
 	}
 
 	@Override
