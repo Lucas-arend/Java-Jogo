@@ -3,10 +3,7 @@ package com.game.Telas;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Image;
-import java.net.URL;
 
 import javax.swing.*;
 import com.game.Conta;
@@ -14,19 +11,33 @@ import com.game.Personagem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.text.Normalizer;
+
 
 @SuppressWarnings("serial")
 public class TelaSelecaoDeck extends JFrame {
 
-	private JButton[] botoes = new JButton[2];
-	private List<JButton> btn = new ArrayList<>();
     int i = 0;
 
     private Conta conta;
 
     private JPanel painelDeck;
     private JPanel painelCartas;
+    JButton btnMontarDeck = new JButton("Montar Deck");
+	JButton btnLoja = new JButton("Loja");
+	JButton btnCampanha = new JButton("Campanha");
+	JButton btnBatalha1 = new JButton("Modo Campanha");
+	JButton btnBatalha2 = new JButton("Batalha Aleatória");
+	JButton btnBatalhasEspeciais = new JButton("Eventos");
+	
+	private JTextField areaParaPesquisar;
 
+	private String normalizar(String texto) {
+	    return Normalizer
+	        .normalize(texto, Normalizer.Form.NFD)
+	        .replaceAll("[^\\p{ASCII}]", "")
+	        .toLowerCase();
+	}
 
     public TelaSelecaoDeck(Conta conta) {
     	
@@ -45,28 +56,65 @@ public class TelaSelecaoDeck extends JFrame {
         painelCartas.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         
+        
         JPanel painelCentral = new JPanel(new GridLayout(1, 2, 10, 10));
         
+        btnCampanha = new JButton("Campanha");
+    	btnMontarDeck = new JButton("Montar Deck");
+    	btnLoja = new JButton("Loja");
 
-        JPanel painelBotoes = new JPanel(new GridLayout(1, 2));
+        btnCampanha.addActionListener(e -> campanha());
+        btnMontarDeck.addActionListener(e -> montarDeck());
+        btnLoja.addActionListener(e -> abrirLoja());
+        btnBatalhasEspeciais.addActionListener(e -> eventos());
+
+        JPanel painelWrapperInterno = new JPanel(new BorderLayout());
+        painelWrapperInterno.add(painelCartas, BorderLayout.NORTH);
+
+        JPanel painelBotoes = new JPanel(new GridLayout(1, 4));
+
+        painelBotoes.add(btnLoja);
+        painelBotoes.add(btnMontarDeck);
+        painelBotoes.add(btnCampanha);
+        painelBotoes.add(btnBatalhasEspeciais);
         
         JPanel wrapperCartas = new JPanel(new BorderLayout());
-        wrapperCartas.add(painelCartas, BorderLayout.NORTH);
-
-        JScrollPane scroll = new JScrollPane(
-        		wrapperCartas,
-                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
-        );
+        JPanel painelFiltros = new JPanel(new GridLayout(1,3));
+        JButton catalogo = new JButton("Catálogo de cartas");
+        
+        catalogo.addActionListener(e -> abrirCatalogo());
+        areaParaPesquisar = new JTextField();
+        
+        areaParaPesquisar.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                filtrarCartas();
+            }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                filtrarCartas();
+            }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                filtrarCartas();
+            }
+        });
+        painelFiltros.add(areaParaPesquisar);
+        painelFiltros.add(catalogo);
+        wrapperCartas.add(painelFiltros, BorderLayout.NORTH);
+     // SCROLL SÓ NAS CARTAS
+        JScrollPane scrollCartas = new JScrollPane(
+        	    painelWrapperInterno,
+        	    JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+        	    JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        	);
+        wrapperCartas.add(scrollCartas, BorderLayout.CENTER);
 
         JScrollPane scroll2 = new JScrollPane(
                 painelDeck,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
         );
-        scroll.getVerticalScrollBar().setUnitIncrement(16); // scroll suave
+        scrollCartas.getVerticalScrollBar().setUnitIncrement(16); // scroll suave
         painelCentral.add(scroll2);
-        painelCentral.add(scroll);
+        painelCentral.add(wrapperCartas);
         
         //add(scroll, BorderLayout.CENTER);
         
@@ -74,12 +122,6 @@ public class TelaSelecaoDeck extends JFrame {
         add(painelBotoes, BorderLayout.SOUTH);
 
 
-        botoes[0] = new JButton("Voltar");
-        botoes[0].addActionListener(e -> voltar());
-        painelBotoes.add(botoes[0]);
-        botoes[1] = new JButton("Salvar");
-        botoes[1].addActionListener(e -> salvar());
-        painelBotoes.add(botoes[1]);
         
         atualizarListaCartas();
         atualizarPainelDeck();
@@ -92,27 +134,52 @@ public class TelaSelecaoDeck extends JFrame {
         setVisible(true);
     }
 
+    private void filtrarCartas() {
+        painelCartas.removeAll();
 
+        String texto = areaParaPesquisar.getText().toLowerCase();
+
+        for (Personagem p : conta.getTodosPersonagens()) {
+
+            // se quiser manter filtro de deck também:
+            if (conta.getDeck().contains(p)) continue;
+
+            //String nome = p.getNome().toLowerCase();
+
+            String nome = normalizar(p.getNome());
+            String busca = normalizar(areaParaPesquisar.getText());
+            if (p.getDesbloqueado() && nome.contains(texto)) {
+                painelCartas.add(criarCarta(p));
+            }
+        }
+
+        painelCartas.revalidate();
+        painelCartas.repaint();
+    }
 
     private JPanel criarCarta(Personagem p) {
 
         JPanel cartaPanel = new JPanel(new BorderLayout());
         cartaPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        cartaPanel.setPreferredSize(new Dimension(160, 260));
-
+        cartaPanel.setPreferredSize(new Dimension(150, 260));
+        
+        
+        
         PainelImagem imagem = new PainelImagem(
                 new ImageIcon(getClass().getResource(p.getCaminhoImagem()))
         );
         imagem.setPreferredSize(new Dimension(150, 250));
-
-        JLabel nome = new JLabel(p.getNome(), SwingConstants.CENTER);
-
+        
         StringBuilder estrelas = new StringBuilder();
         for (int i = 0; i < p.getGrau(); i++) {
             estrelas.append("🌟");
         }
 
-        JLabel grau = new JLabel(estrelas + " Nv " + p.getNivel(), SwingConstants.CENTER);
+        JLabel nome = new JLabel(p.getNome() + " Nível: " + p.getNivel(), SwingConstants.CENTER);
+
+        
+
+        JLabel grau = new JLabel(estrelas + "", SwingConstants.CENTER);
 
         JButton botaoInfo = new JButton("Informações");
         JButton botao = new JButton();
@@ -153,6 +220,7 @@ public class TelaSelecaoDeck extends JFrame {
         cartaPanel.add(nome, BorderLayout.NORTH);
         cartaPanel.add(imagem, BorderLayout.CENTER);
         cartaPanel.add(infoPanel, BorderLayout.SOUTH);
+        
 
         return cartaPanel;
     }
@@ -194,7 +262,7 @@ public class TelaSelecaoDeck extends JFrame {
         List<Personagem> disponiveis = new ArrayList<>();
 
         for (Personagem p : conta.getTodosPersonagens()) {
-            if (/*p.getDesbloqueado() &&*/!conta.getDeck().contains(p)) {
+            if (/*p.getDesbloqueado() && */!conta.getDeck().contains(p)) {
                 disponiveis.add(p);
             }
         }
@@ -210,27 +278,30 @@ public class TelaSelecaoDeck extends JFrame {
 
 
 
-
-
-
-
-    private void salvar() {
-        if (conta.getDeck().isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "Selecione pelo menos 1 personagem!");
-            return;
-        }
-
-        conta.criarDeckParaBatalha();
-        setVisible(false);
-        new TelaInicial(conta);
+    private void abrirCatalogo() {
+    	setVisible(false);
+    	new TelaCatalogo(conta);
     }
 
-	
-	private void voltar() {
+	private void campanha() {
 		setVisible(false);
 		new TelaInicial(conta);
 	}
+	private void eventos() {
+		
+	}
+
+    private void montarDeck() {
+    	setVisible(false);
+    	new TelaSelecaoDeck(conta);
+    }
+    
+	private void abrirLoja() {
+		setVisible(false);
+		new TelaLoja(conta);
+	}
+
+
     
 
 }

@@ -19,6 +19,7 @@ public class BancoDePersonagens {
 		personagensDisponiveis.add(new Golem_De_Pedra(7L));
 		personagensDisponiveis.add(new Mago_Das_Ilusões(8L));
 		personagensDisponiveis.add(new Mago_Eletrico(9L));
+		personagensDisponiveis.add(new T_Rex(10L));
 		// Adicione mais personagens conforme necessário
 	}
 

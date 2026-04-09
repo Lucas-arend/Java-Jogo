@@ -10,7 +10,7 @@ public class Efeito {
     private int valor;
     private int duracao;
     private int valorAplicado = 0;
-    private final TagEfeito tag;
+    private TagEfeito tag;
     private boolean applied;
     private String descricao;
 
@@ -323,12 +323,12 @@ public class Efeito {
             case BUFF_ATTACK, BUFF_DEFENSE, BUFF_SPEED,
                  BUFF_CRIT_CHANCE, BUFF_CRIT_DAMAGE,
                  BUFF_HEAL, BUFF_SHIELD,
-                 INVULNERABLE, IMMUNITY,
+                 INVULNERABLE, IMMUNITY, HEAL_OVER_TIME,
                  LIFESTEAL, REFLECT_DAMAGE -> Categoria.BUFF;
 
             case NERF_ATTACK, NERF_DEFENSE, NERF_SPEED,
                  NERF_CRIT_CHANCE, NERF_CRIT_DAMAGE,
-                 DAMAGE_OVER_TIME,
+                 DAMAGE_OVER_TIME, NERF_HEAL, NERF_SHIELD,
                  STUN, SILENCE, ROOT, TAUNT -> Categoria.NERF;
 
             default -> Categoria.NEUTRO;

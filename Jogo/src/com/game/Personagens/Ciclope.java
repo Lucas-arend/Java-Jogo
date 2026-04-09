@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.game.CaracteristicasHabilidade;
 import com.game.Classe;
+import com.game.Familia;
 import com.game.Habilidade;
 import com.game.ListaEfeitos;
 import com.game.Personagem;
@@ -21,6 +22,7 @@ public class Ciclope extends Personagem {
 				1,
 	            Tipo.TERRA,
 	            Classe.GUERREIRO,
+	            Familia.GIGANTE,
 	            Raridade.ÉPICO,
 	            "Um enorme guerreiro com apenas um olho e uma fome insaciavel",
 	            new StatusBase(

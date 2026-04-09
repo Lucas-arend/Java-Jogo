@@ -3,10 +3,9 @@ package com.game.Personagens;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.ImageIcon;
-
 import com.game.CaracteristicasHabilidade;
 import com.game.Classe;
+import com.game.Familia;
 import com.game.Habilidade;
 import com.game.ListaEfeitos;
 import com.game.Personagem;
@@ -25,6 +24,7 @@ public class Fenix extends Personagem {
 	            1,
 	            Tipo.FOGO,
 	            Classe.SUPORTE,
+	            Familia.MISTICO,
 	            Raridade.LENDÁRIO,
 	            "Cura a si mesma e causa dano em área",
 	            new StatusBase(

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.game.CaracteristicasHabilidade;
 import com.game.Classe;
+import com.game.Familia;
 import com.game.Habilidade;
 import com.game.ListaEfeitos;
 import com.game.Personagem;
@@ -23,20 +24,21 @@ public class Zumbi extends Personagem{
 				1,
 				Tipo.SOMBRA, 
 				Classe.ASSASSINO, 
+				Familia.MORTO_VIVO,
 				Raridade.LENDÁRIO, 
 				"Um grupo de zumbis, que aumenta seu bando ao derotar seu adverario. Quanto mais zumbis mais letal.",
 				new StatusBase(
-					    800, // vidaMaxima
-		                800,  // vida
+					    600, // vidaMaxima
+		                600,  // vida
 		                200,  // ataque
 		                0,   // defesa %
-		                60,   // velocidade
+		                50,   // velocidade
 		                0,   // proteção
-		                10,   // chance de crítico
+		                0,   // chance de crítico
 		                1.25   // dano crítico
 		            )
 		        );
-			habilidades[0] = new Habilidade("Ataque de infecção", Arrays.asList(CaracteristicasHabilidade.DANO_BAIXO, CaracteristicasHabilidade.DOT_ALTO), 0, 0, this);
+			habilidades[0] = new Habilidade("Ataque de infecção", Arrays.asList(CaracteristicasHabilidade.DANO_BAIXO, CaracteristicasHabilidade.DOT), 0, 0, this);
 		    habilidades[1] = new Habilidade("Ataque em bando", Arrays.asList(CaracteristicasHabilidade.DANO_ALTO), 1, 2, this); // começa em CD
 		    habilidades[2] = new Habilidade("Horda infinita", Arrays.asList(CaracteristicasHabilidade.REVIVER), 2, 4, this);
 		    habilidades[3] = new Habilidade("Devorar em grupo", Arrays.asList(CaracteristicasHabilidade.DANO_LETAL, CaracteristicasHabilidade.CURA_ALTA), 3, 3, this); // começa em CD
@@ -74,7 +76,10 @@ public class Zumbi extends Personagem{
 	}
 	@Override
 	protected void AoNocautear(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
-
+    		this.bando ++;
+    		this.setVida(this.getVidaMaxima());
+    		System.out.println(bando);
+    		
 	}
 	@Override
 	protected void Nocauteado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
@@ -87,16 +92,6 @@ public class Zumbi extends Personagem{
 	}
 	@Override
 	protected void inicioDoTurno(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2) {
-		if(this.isVivo()) {
-			int efeitos = adversario.getEfeitosAtivos().size();
-		for(int i = 0; i < efeitos; i++) {
-			if(adversario.nomeEfeito("Infecção")) {
-	    	int dot = (int)(adversario.valorEfeito("Infecção") * 1.2);
-	    	adversario.removerEfeitosPorNome("Infecção");
-	    	adversario.aplicarEfeito(ListaEfeitos.danoProlongado("Infecção", dot, 2).copiar(), this);
-		}
-		}
-		}
 				
 	}
 	@Override
@@ -112,14 +107,14 @@ public class Zumbi extends Personagem{
 	@Override
 	protected String descricaoPassivas() {
 		// TODO Auto-generated method stub
-		return "O " + getNome() + " começa com uma horda de " + (bando + 1) + " zumbis, ao ser nocauteado outro zumbi do bando entra em seu lugar! \n"
-				+ "O efeito infeccção recebe +20% de dano no início de cada turno, e recebe + 1 turno de duração, (esse efeito para de afetar a infecção no momento que o último zumbi da horda for derrotado!";
-	}
+		return "O " + getNome() + " começa com uma horda de " + (bando + 1) + " zumbis, ao ser nocauteado outro zumbi do bando entra em seu lugar! \n" +
+				"Ao finalizar um adversário o zumbi recebe 1 acumulo de bando e recupera toda a vida";
+		}
 	@Override
 	protected boolean Habilidade1(Habilidade habilidade1, Personagem alvo, Personagem atacante, List<Personagem> time1,
 			List<Personagem> time2) {
-    	int dano = (int)(this.getAtaqueFinal()*0.5);
-    	int dot = (int)(this.getAtaqueFinal() * 0.25);
+    	int dano = (int)(this.getAtaqueFinal());
+    	int dot = (int)(this.getAtaqueFinal() * 1);
     	alvo.receberDano(dano, this, time1, time2);
     	if (alvo.nomeEfeito("infecção")) {
     		return true;
@@ -152,16 +147,13 @@ public class Zumbi extends Personagem{
     		dilaceracao += ((int)(alvo.getVidaMaxima() / 5));	    	
     		}
     	alvo.dilaceracao((int)(dilaceracao), this, time1, time2);
-    	if (!alvo.isVivo()) {
-    		this.bando ++;
-    		System.out.println(bando);
-    	}		return true;
+    	return true;
 	}
 
 	@Override
 	protected String descricaoHabilidade1() {
 		// TODO Auto-generated method stub
-		return "Um ataque que causa " + (int) (this.getAtaqueFinal() + 0.5) + " de dano e deixa o adversário com infecção ( causa " + (int) (this.getAtaqueFinal() * 0.25) + " de dano por 2 turnos.";
+		return "Um ataque que causa " + (int) (this.getAtaqueFinal()) + " de dano e deixa o adversário com infecção ( causa " + (int) (this.getAtaqueFinal() * 0.5) + " de dano por 2 turnos.";
 	}
 
 	@Override

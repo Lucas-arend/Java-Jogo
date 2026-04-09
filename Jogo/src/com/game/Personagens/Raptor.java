@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.game.CaracteristicasHabilidade;
 import com.game.Classe;
+import com.game.Familia;
 import com.game.Habilidade;
 import com.game.ListaEfeitos;
 
@@ -23,6 +24,7 @@ public class Raptor extends Personagem {
 	            1,
 	            Tipo.TERRA,
 	            Classe.ASSASSINO,
+	            Familia.DINOSSAURO,
 	            Raridade.COMUM,
 	            "Causa dano rápido e aplica efeitos de controle de multidão",
 	            new StatusBase(

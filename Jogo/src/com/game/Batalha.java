@@ -60,7 +60,7 @@ public class Batalha implements CombatListener{
     private void aplicarStatusIniciais(List<Personagem> time) {
         for (Personagem p : time) {
             p.StatusNivel();
-            //p.StatusGrau();
+            p.StatusGrau();
         }
     }
 

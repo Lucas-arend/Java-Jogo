@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.game.CaracteristicasHabilidade;
 import com.game.Classe;
-import com.game.Efeito.TagEfeito;
+import com.game.Familia;
 import com.game.Habilidade;
 import com.game.ListaEfeitos;
 import com.game.Personagem;
@@ -24,7 +24,8 @@ public class Dragao extends Personagem {
 		            1,
 		            Tipo.FOGO,
 		            Classe.TANQUE,
-		            Raridade.LENDÁRIO,
+		            Familia.DRAGAO,
+		            Raridade.ÉPICO,
 		            "Uma lendária criatura conhecida por suas escamas resistentes e a capacidade de assoprar chamas.",
 		            new StatusBase(
 		                3000, // vidaMaxima

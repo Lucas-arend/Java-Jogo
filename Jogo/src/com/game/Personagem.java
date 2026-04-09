@@ -1,6 +1,8 @@
 package com.game;
 
 import java.util.*;
+
+import com.game.Efeito.Categoria;
 import com.game.Efeito.TagEfeito;
 
 public abstract class Personagem {
@@ -10,7 +12,6 @@ public abstract class Personagem {
 	    this.listener = listener;
 	}
 	
-	@SuppressWarnings("unused")
 	private String caminhoImagem;
 	private String nome;
 	private long id;
@@ -24,6 +25,7 @@ public abstract class Personagem {
 	private Raridade raridade;	
 	private Tipo tipo;
 	private Classe classe;
+	private Familia familia;
 	private int nivel = 1;
 	private int experiencia = 0;
 	private int metaExperiencia = 100;
@@ -43,8 +45,8 @@ public abstract class Personagem {
 	protected final StatusBase statusBase;
 	private Personagem ultimoAtacante;
 	
-	private double multiplicadorDano = 1;
-	private double multiplicadorCura = 1;
+	double multiplicadorDano = 1;
+	double multiplicadorCura = 1;
 	double multiplicadorDefesa = 1.0;
 	double multiplicadorVelocidade = 1.0;
 	
@@ -86,6 +88,7 @@ public abstract class Personagem {
 	        int nivel,
 	        Tipo tipo,
 	        Classe classe,
+	        Familia familia,
 	        Raridade raridade,
 	        String descricao,
 	        StatusBase statusBase
@@ -95,6 +98,7 @@ public abstract class Personagem {
 	    this.nome = nome;
 	    this.tipo = tipo;
 	    this.classe = classe;
+	    this.familia = familia;
 	    this.raridade = raridade;
 	    this.descricao = descricao;
 	    // Status iniciais
@@ -206,7 +210,7 @@ public abstract class Personagem {
 	public void setVelocidade(int velocidade) {this.velocidade = velocidade;}
 	public void setProtecao(int protecao) {this.protecao = protecao;}
 	public void setVidaMaxima(int vidaMaxima) {this.vidaMaxima = vidaMaxima;}
-	public void setMultiplicadorDano(double valor) {this.multiplicadorDano = Math.max(0, valor);}
+	public void setMultiplicadorDano(double valor) {this.multiplicadorDano =  valor;}
 	public void setMultiplicadorCura(double MC) {this.multiplicadorCura = MC;}
     public void setMultiplicadorVelocidade(double v) { multiplicadorVelocidade = v; }
     public void setMultiplicadorDefesa(double v) { multiplicadorDefesa = v; }
@@ -340,32 +344,29 @@ public abstract class Personagem {
 	//Gerenciamento dos Status pelo nível (para ser mais fácil de balancear)
 	public void StatusNivel() {
 		resetarStatus();
-		double valor1 = ((this.nivel - 1) * 0.1);
+		double valor1 = ((this.nivel - 1) * 0.05);
 		this.ataque += (int) (statusBase.ataque * valor1);
 		this.vidaMaxima += (int) (statusBase.vidaMaxima * valor1);
 		this.vida += (int) (statusBase.vida * valor1);
-		this.velocidade +=  nivel;
 		this.vidaInicial += (int) (statusBase.vida * valor1);
 		this.ataqueInicial += (int)(statusBase.ataque * valor1);
 		this.vidaMaximaInicial += (int)(statusBase.vidaMaxima * valor1);
+		this.protecao += (int)(statusBase.protecao * valor1); 
 	}
 	
 	public void StatusGrau() {
-		double valor1 = (this.grau * 0.3);
-		
-			this.ataque += (int) (statusBase.ataque * valor1);
-		    this.vidaMaxima += (int) (statusBase.vidaMaxima * valor1);
-		    this.vida += (int) (statusBase.vida * valor1);
-		    this.velocidade += (grau * 3);
-		    this.vidaInicial += (int) (statusBase.vida * valor1);
-		    this.ataqueInicial += (int)(statusBase.ataque * valor1);
-		    this.vidaMaximaInicial += (int)(statusBase.vidaMaxima * valor1);
-		
-		
+		double valor1 = ((this.grau - 1) * 0.1);
+		this.ataque += (int) (statusBase.ataque * valor1);
+		this.vidaMaxima += (int) (statusBase.vidaMaxima * valor1);
+		this.vida += (int) (statusBase.vida * valor1);
+		this.vidaInicial += (int) (statusBase.vida * valor1);
+		this.ataqueInicial += (int)(statusBase.ataque * valor1);
+		this.vidaMaximaInicial += (int)(statusBase.vidaMaxima * valor1);
+		this.protecao += (int)(statusBase.protecao * valor1);		
 	}
 	
 	protected void desbloquear() {
-			    this.desbloqueado = true;
+		this.desbloqueado = true;
 	}
 	
 	protected void resetarStatus() {
@@ -510,19 +511,20 @@ public abstract class Personagem {
 		}
 	}
 	
+
 	public boolean estaVivo() {
 	    return vida > 0;
 	}
 
 	public void nocautear(Personagem adversario, List<Personagem> time1, List<Personagem> time2, boolean ativar, int dano) {
-		if (vida > 0) {
-			vida = 0;
-		}
-        if(vida == 0) {
+		 if (!vivo) return; 
+		if (vida <= 0) {
 			this.vida = 0;
 			this.vivo = false;
 		}
-        if(ativar) this.Nocauteado(adversario, this, time1, null, dano);
+ 
+        if(ativar) this.Nocauteado(adversario, this, time1, time2, dano);
+        if(!this.vivo) adversario.AoNocautear(this, adversario, time1, time2, dano);
         if(vida <= 0 && listener != null)
             listener.onDeath(this);
 		
@@ -573,15 +575,10 @@ public abstract class Personagem {
 	    vida -= danoFinal;
 	    danoSofrido -= vida;
 	    
-	    // 🔒 Nunca deixar HP negativo aqui
-	    if (vida < 0) vida = 0;     
-	    // 🔥 MORTE
-	    if (vida == 0) {
+
+	    if (vida <= 0) {
 	    	nocautear(atacante, time1, time2, true, danoSofrido);
 	    }   
-	    if (!vivo && atacante != null) {
-	        atacante.AoNocautear(this, atacante, time1, time2, danoSofrido);
-	    }
 
 	    // 🔹 Passivas AO ATACAR
 	    if (atacante != null) {
@@ -602,7 +599,7 @@ public abstract class Personagem {
 
 	
 	public int danoDireto(int dano, Personagem atacante, List<Personagem> time1, List<Personagem> time2) {
-		dano = (int)(dano * multiplicadorDano);
+		dano = (int)(dano * calcularMultiplicadorDeDano());
 	    Random random = new Random();
 	    int danoSofrido = this.vida;
 	    int sorteio = random.nextInt(100);
@@ -613,15 +610,10 @@ public abstract class Personagem {
         }
 		this.vida -= dano;
 		danoSofrido -= vida;
-	    // 🔒 Nunca deixar HP negativo aqui
-	    if (vida < 0) vida = 0;     
-	    // 🔥 MORTE
-	    if (vida == 0) {
+
+	    if (vida <= 0) {
 	    	nocautear(atacante, time1, time2, true, danoSofrido);
 	    }   
-	    if (!vivo && atacante != null) {
-	        atacante.AoNocautear(this, atacante, time1, time2, danoSofrido);
-	    }
 
 	    // 🔹 Passivas AO ATACAR
 	    if (atacante != null) {
@@ -629,7 +621,7 @@ public abstract class Personagem {
 	    }
 
 	    // 🔹 Passivas AO RECEBER DANO
-	    if (vida > 0 && atacante != null) {
+	    if (vivo && atacante != null) {
 	        this.aoSerAtacado(atacante, this, time1, time2, danoSofrido);
 	    }
 
@@ -665,9 +657,9 @@ public abstract class Personagem {
         vida -= danoSofrido;
 
         if (vida <= 0) {
-        vida = 0;
         nocautear(atacante, time1, time2, true, danoSofrido);
         }
+        
 	    if(listener != null) listener.onHit(this, danoSofrido);
 
         return danoSofrido;
@@ -679,6 +671,12 @@ public abstract class Personagem {
 
 	    if (efeito == null) return;
 
+	    if (this.imune && efeito.getCategoria().equals(Categoria.NERF)) {
+	    	System.out.println("\n\nIMUNE! não recebeu: " + efeito.getNomeEfeito());
+	    	return;
+	    }
+	    	
+	    
 	    Efeito copia = efeito.copiar();
 
 	    copia.applyImmediate(this);
@@ -794,10 +792,15 @@ public abstract class Personagem {
     }
 
 
+    public double calcularMultiplicadorDeDano() {
+    	double val = this.multiplicadorDano;
+    	if(val < 0) val = 0;
+    	return val;
+    }
     
     public int getAtaqueFinal() {
         int ataqueFinal = ataque;
-        ataqueFinal = (int)(ataqueFinal * multiplicadorDano);
+        ataqueFinal = (int)(ataqueFinal * calcularMultiplicadorDeDano());
         return Math.max(0, ataqueFinal);
     }
 
@@ -1028,7 +1031,7 @@ public abstract class Personagem {
 	 public String listarStatusUI() {
 		    StringBuilder sb = new StringBuilder();
 		    String grauS = "";
-            for(int i = 0; this.getGrau() >= i; i++) {
+            for(int i = 0; this.getGrau() > i; i++) {
             	grauS += "🌟";
             }
 
@@ -1088,7 +1091,7 @@ public abstract class Personagem {
 	 public String listarStatusUIBatalha() {
 		    StringBuilder sb = new StringBuilder();
 		    String grauS = "";
-         for(int i = 0; this.getGrau() >= i; i++) {
+         for(int i = 0; this.getGrau() > i; i++) {
          	grauS += "🌟";
          }
 

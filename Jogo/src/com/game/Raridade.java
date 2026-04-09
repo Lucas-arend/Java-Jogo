@@ -2,9 +2,10 @@ package com.game;
 
 public enum Raridade {
     COMUM(1, 1),
-    RARO(2, 2),
-    ÉPICO(3, 3),
-    LENDÁRIO(5, 4);
+    RARO(3, 2),
+    ÉPICO(5, 3),
+    MÍTICO(7,4),
+    LENDÁRIO(9, 5);
 
     private final int grauInicial;
     private final int preco;

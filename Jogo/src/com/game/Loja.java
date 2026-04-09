@@ -53,11 +53,11 @@ public class Loja {
 
     private static void comprarBau(Conta conta, String nome) {
         if ("bau comum".equals(nome)) {
-        	JOptionPane.showMessageDialog(null, conta.desbloquearPersonagemAleatorio(7490, 2000, 500, 10));
+        	JOptionPane.showMessageDialog(null, conta.desbloquearPersonagemAleatorio(7459, 2000, 500, 40, 1));
         } else if ("bau lendário".equals(nome)) {
-        	JOptionPane.showMessageDialog(null, conta.desbloquearPersonagemAleatorio(0, 0, 0, 100));
+        	JOptionPane.showMessageDialog(null, conta.desbloquearPersonagemAleatorio(0, 0, 0, 0, 100));
         } else if ("bau épico".equals(nome)) {
-        	JOptionPane.showMessageDialog(null, conta.desbloquearPersonagemAleatorio(0, 0, 100, 0));
+        	JOptionPane.showMessageDialog(null, conta.desbloquearPersonagemAleatorio(0, 0, 100, 0,  0));
         }
     }
 

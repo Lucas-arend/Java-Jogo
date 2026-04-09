@@ -1,6 +1,5 @@
 package com.game;
 
-import java.awt.Component;
 import java.util.*;
 
 public class Conta {
@@ -29,11 +28,12 @@ public class Conta {
         this.setSenha(senha);
         
         this.desbloquearPersonagem(1);
-        this.desbloquearPersonagem(4);
+
         
         
         this.moedas = 1000;
         this.gemas = 50;
+        
     }
 
     // =========================
@@ -133,10 +133,11 @@ public class Conta {
             int comum,
             int raro,
             int epico,
+            int mitico,
             int lendario
     ) {
 
-        int total = comum + raro + epico + lendario;
+        int total = comum + raro + epico + mitico + lendario;
         if (total <= 0) {
             return "Probabilidades inválidas";
         }
@@ -152,9 +153,11 @@ public class Conta {
             raridadeSorteada = Raridade.RARO;
         } else if (sorteio < comum + raro + epico) {
             raridadeSorteada = Raridade.ÉPICO;
-        } else {
-            raridadeSorteada = Raridade.LENDÁRIO;
-        }
+        } else if (sorteio < comum + raro + epico + mitico){
+        	raridadeSorteada = Raridade.MÍTICO;
+        }else 	raridadeSorteada = Raridade.LENDÁRIO;
+            
+    
 
         // Filtra personagens dessa raridade
         List<Personagem> candidatos = bancoDePersonagens.getPersonagensDisponiveis()

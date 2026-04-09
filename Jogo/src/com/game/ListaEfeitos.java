@@ -41,7 +41,7 @@ public abstract class ListaEfeitos {
             Efeito.Kind.BUFF_ATTACK,
             TagEfeito.DANO,
             duracao,
-            "Aumenta o ataque em " + valor + " por " + duracao + " turnos."
+            "Aumenta o ataque em " + valor + "% por " + duracao + " turnos."
         );
     }
 
@@ -52,7 +52,7 @@ public abstract class ListaEfeitos {
             Efeito.Kind.NERF_ATTACK,
             TagEfeito.REDUCAO_DANO,
             duracao,
-            "Reduz o ataque em " + valor + " por " + duracao + " turnos."
+            "Reduz o ataque em " + valor + "% por " + duracao + " turnos."
         );
     }
 
@@ -76,7 +76,7 @@ public abstract class ListaEfeitos {
             nome,
             valor,
             Efeito.Kind.NERF_DEFENSE,
-            TagEfeito.REDUCAO_DANO,
+            TagEfeito.DEFESA,
             duracao,
             "Reduz a defesa em " + valor + " por " + duracao + " turnos."
         );
@@ -93,7 +93,7 @@ public abstract class ListaEfeitos {
             Efeito.Kind.BUFF_SPEED,
             TagEfeito.VELOCIDADE,
             duracao,
-            "Aumenta a velocidade em " + valor + " por " + duracao + " turnos."
+            "Aumenta a velocidade em " + valor + "% por " + duracao + " turnos."
         );
     }
 
@@ -104,7 +104,7 @@ public abstract class ListaEfeitos {
             Efeito.Kind.NERF_SPEED,
             TagEfeito.VELOCIDADE,
             duracao,
-            "Reduz a velocidade em " + valor + " por " + duracao + " turnos."
+            "Reduz a velocidade em " + valor + "% por " + duracao + " turnos."
         );
     }
 
@@ -143,7 +143,7 @@ public abstract class ListaEfeitos {
     			Efeito.Kind.NERF_HEAL,
     			TagEfeito.REDUCAO_CURA,
     			duracao,
-    			"Reduz a cura em " + valor + " por " + duracao + " turnos."
+    			"Reduz a cura em " + valor + "% por " + duracao + " turnos."
     			);
     			
     }
@@ -155,7 +155,7 @@ public abstract class ListaEfeitos {
     			Efeito.Kind.BUFF_HEAL,
     			TagEfeito.AUMENTO_CURA,
     			duracao,
-    			"Aumenta a cura em " + valor + " por " + duracao + " turnos."
+    			"Aumenta a cura em " + valor + "% por " + duracao + " turnos."
     			);
     			
     }

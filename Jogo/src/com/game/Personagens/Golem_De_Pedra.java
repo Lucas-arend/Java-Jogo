@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.game.CaracteristicasHabilidade;
 import com.game.Classe;
+import com.game.Familia;
 import com.game.Habilidade;
 import com.game.ListaEfeitos;
 import com.game.Personagem;
@@ -14,6 +15,7 @@ import com.game.Tipo;
 
 public class Golem_De_Pedra extends Personagem{
 
+	boolean golemita = true;
 	public Golem_De_Pedra(long id) {
 		super(
 	            id,
@@ -21,13 +23,14 @@ public class Golem_De_Pedra extends Personagem{
 	            1,
 	            Tipo.TERRA,
 	            Classe.TANQUE,
+	            Familia.ROCHA,
 	            Raridade.RARO,
 	            "Tem uma resistencia enorme e protege o time.",
 	            new StatusBase(
-	                5000, // vidaMaxima
-	                5000,  // vida
+	                4000, // vidaMaxima
+	                4000,  // vida
 	                300,  // ataque
-	                50,   // defesa %
+	                40,   // defesa %
 	                40,   // velocidade
 	                0,   // proteção
 	                25,   // chance de crítico
@@ -87,6 +90,22 @@ public class Golem_De_Pedra extends Personagem{
 	@Override
 	protected void Nocauteado(Personagem adversario, Personagem aliado, List<Personagem> time1, List<Personagem> time2, int dano) {
 		// TODO Auto-generated method stub
+		int dano1 = (int) (this.getAtaqueFinal() * 2.5);
+		if(!golemita) dano1 = (int)(this.getAtaqueFinal());
+		for(int i = 0; i < time2.size(); i++) {
+			time2.get(i).receberDano(dano1, this, time1, time2);
+				
+		}	
+		
+		if(golemita) {
+			this.setVidaMaxima((int)(this.getVidaMaxima() / 3));
+			this.setNome("Golemita");
+			this.setAtaque((int)(this.getAtaque() / 2));
+			this.setDefesa((int)(this.getDefesa()/2));
+			this.setVivo(true);
+			this.setVida(getVidaMaxima());
+			golemita = false;
+		}
 		
 	}
 
@@ -113,20 +132,15 @@ public class Golem_De_Pedra extends Personagem{
 	@Override
 	protected String descricaoPassivas() {
 		// TODO Auto-generated method stub
-		return "Sem passivas disponíveis!";
+		return "Causa " + (int) (this.getAtaqueFinal() * 2.5) + " de dano em todos os adversários e gera um Golemita.";
 	}
 
 	@Override
 	protected boolean Habilidade1(Habilidade habilidade1, Personagem alvo, Personagem atacante, List<Personagem> time1,
 			List<Personagem> time2) {
-		int val = time2.size();
-		int dano = (int) (this.getAtaqueFinal() / 3);
-		for(int i = 0; i < val; i++) {
-			if(time2.get(i).getDefesa() > 0) {
-				time2.get(i).receberDano(dano, atacante, time1, time2);
-			}
-			
-		}		
+		int dano = (int) (this.getAtaqueFinal() );
+		alvo.receberDano(dano, atacante, time1, time2);
+		alvo.aplicarEfeito(ListaEfeitos.reducaoCura("Redução de cura", 50, 3), atacante);
 			return true;
 	}
 
@@ -144,13 +158,15 @@ public class Golem_De_Pedra extends Personagem{
 				}
 				
 			}
-			this.aplicarEfeito(ListaEfeitos.aumentoDefesa("Aumento de Defesa", def, 2), this);		return true;
+			this.aplicarEfeito(ListaEfeitos.aumentoDefesa("Aumento de Defesa", def, 2), this);
+
+			return true;
 	}
 
 	@Override
 	protected boolean Habilidade3(Habilidade habilidade3, Personagem alvo, Personagem atacante, List<Personagem> time1,
 			List<Personagem> time2) {
-			int val = this.getDefesaFinal();
+			    int val = this.getDefesaFinal();
 				int def = (int) (val / (time1.size() - 1));
 				this.aplicarEfeito(ListaEfeitos.reducaoDefesa("Redução de Defesa", val, 2), this);
 				for(int i = 0; i < time1.size(); i++) {
@@ -159,18 +175,19 @@ public class Golem_De_Pedra extends Personagem{
 					}
 				}
 				return true;
+				
 	}
 
 	@Override
 	protected boolean Habilidade4(Habilidade habilidade4, Personagem alvo, Personagem atacante, List<Personagem> time1,
 			List<Personagem> time2) {
 		int val = time2.size();
-			int dano = (int) (this.getAtaqueFinal() * 5);
+			int dano = (int) (this.getAtaqueFinal() * 2.5);
 			for(int i = 0; i < val; i++) {
-				if(time2.get(i).getDefesa() > 0) {
+				
 					time2.get(i).receberDano(dano, atacante, time1, time2);
 				System.out.println(time2.get(i).getNome() + " recebe "+ dano + " de dano.");
-				}
+				
 				
 			}		
 			return true;
@@ -179,7 +196,7 @@ public class Golem_De_Pedra extends Personagem{
 	@Override
 	protected String descricaoHabilidade1() {
 		// TODO Auto-generated method stub
-		return "Causa " + (int)(this.getAtaqueFinal() / 3) + " de dano a todos os adversários.";
+		return "Causa " + (int)(this.getAtaqueFinal()) + " de dano e reduz a cura do alvo em 50% por 3 turnos.";
 	}
 
 	@Override
@@ -197,7 +214,7 @@ public class Golem_De_Pedra extends Personagem{
 	@Override
 	protected String descricaoHabilidade4() {
 		// TODO Auto-generated method stub
-		return "Causa " + (int) (this.getAtaqueFinal() * 5) + " de dano em todos os adversários.";
+		return "Causa " + (int) (this.getAtaqueFinal() * 2.5) + " de dano em todos os adversários.";
 	}
 
 }

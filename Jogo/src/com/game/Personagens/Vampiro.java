@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.game.CaracteristicasHabilidade;
 import com.game.Classe;
+import com.game.Familia;
 import com.game.Habilidade;
 import com.game.ListaEfeitos;
 import com.game.Personagem;
@@ -22,7 +23,8 @@ public class Vampiro extends Personagem {
 			1,
 			Tipo.SOMBRA,
 			Classe.ASSASSINO,
-			Raridade.RARO,
+			Familia.SOMBRIO,
+			Raridade.COMUM,
 			"Um ser noturno que se alimenta da energia vital dos outros.",
 			new StatusBase(
 				2000, // vidaMaxima
@@ -31,8 +33,8 @@ public class Vampiro extends Personagem {
 				0,   // defesa %
 				90,   // velocidade
 				0,     // proteção
-                50,   // chance de crítico
-                1.50   // dano crítico
+                5,   // chance de crítico
+                1.25   // dano crítico
 			)
 		);
 		habilidades[0] = new Habilidade("Mordida Sanguinária", Arrays.asList(CaracteristicasHabilidade.DANO, CaracteristicasHabilidade.CURA), 0, 0, this);
