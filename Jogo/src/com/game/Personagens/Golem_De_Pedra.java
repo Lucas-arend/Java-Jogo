@@ -104,6 +104,7 @@ public class Golem_De_Pedra extends Personagem{
 			this.setDefesa((int)(this.getDefesa()/2));
 			this.setVivo(true);
 			this.setVida(getVidaMaxima());
+			adicionarImagem();
 			golemita = false;
 		}
 		
@@ -125,8 +126,8 @@ public class Golem_De_Pedra extends Personagem{
 
 	@Override
 	protected void adicionarImagem() {
-	    setCaminhoImagem("/resurces/Golem_De_Pedra.png");
-		
+	    if(this.golemita) setCaminhoImagem("/resurces/Golemita.png");
+	    else setCaminhoImagem("/resurces/Golem_De_Pedra.png");
 	}
 
 	@Override
